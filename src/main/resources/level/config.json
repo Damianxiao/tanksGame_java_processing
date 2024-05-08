@@ -1,0 +1,31 @@
+{
+  "levels": [
+    {
+      "layout": "level1.txt",
+      "background": "background1.png",
+      "foreground-color": "255,255,255",
+      "trees": "trees1.png"
+    },
+    {
+      "layout": "level2.txt",
+      "background": "background2.png",
+      "foreground-color": "234,221,181",
+      "trees": "trees2.png"
+    },
+    {
+      "layout": "level3.txt",
+      "background": "background3.png",
+      "foreground-color": "120,171,0",
+      "trees": "trees3.png"
+    }
+  ],
+  "player_color": {
+    "A": "255,0,0",
+    "B": "0,0,255",
+    "C": "0,255,0",
+    "D": "255,255,0",
+    "E": "255,0,255",
+    "F": "0,255,255",
+    "G": "255,255,255"
+  }
+}
