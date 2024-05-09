@@ -20,7 +20,9 @@ public class Tank {
         this.isAlive = isAlive;
         this.activationTime = activationTime;
         // set the default angle to 0
-        this.angle = 0;
+//        this.angle = 90;
+        // random between 90 and 270
+        this.angle = Math.random() * 180 + 90;
         this.power = power;
         this.fuel = fuel;
     }
@@ -28,10 +30,10 @@ public class Tank {
     // rotateTower emsure the angle is between -90 and 90
     public void rotateTower(double angle) {
         this.angle += angle;
-        if (this.angle >= 90) {
+        if (this.angle < 90) {
             this.angle = 90;
-        } else if (this.angle <= -90) {
-            this.angle = -90;
+        } else if (this.angle >270) {
+            this.angle = 270;
         }
     }
 
@@ -43,8 +45,8 @@ public class Tank {
 
     // getters and setters
 
-    public double getAngle() {
-        return angle;
+    public int getAngle() {
+        return (int) angle;
     }
 
     public void setAngle(double angle) {

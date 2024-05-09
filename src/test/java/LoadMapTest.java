@@ -14,8 +14,8 @@ public class LoadMapTest {
         System.out.println("before smooth");
         map.printMap();
         // Smooth the map
-//        map.smoothMap(map.getTerrain());
-        map.smoothTerrain();
+        // map.smoothMap(map.getTerrain());
+        // map.smoothTerrain();
         System.out.println("after smooth");
         map.printMap();
 

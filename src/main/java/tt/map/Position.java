@@ -4,6 +4,7 @@ public class Position {
     private char symbol;
     private int x;
     private int y;
+    private int angle;
 
     public Position(int x, int y) {
         this.x = x;
@@ -14,6 +15,7 @@ public class Position {
         this.x  = x;
         this.y = y;
         this.symbol = symbol;
+
     }
 
     public int getX() {
@@ -39,4 +41,13 @@ public class Position {
     public void setSymbol(char symbol) {
         this.symbol = symbol;
     }
+
+    public int getAngle() {
+        return angle;
+    }
+
+    public void setAngle(int angle) {
+        this.angle = angle;
+    }
+
 }

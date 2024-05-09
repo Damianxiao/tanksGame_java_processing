@@ -16,7 +16,8 @@ public class Map {
     private int terrainColor;
     private String treeFileName;
 
-    public Map(List<List<Character>> grid, int[][] terrain, ArrayList<Position> playerPositions, ArrayList<Position> treePositions) {
+    public Map(List<List<Character>> grid, int[][] terrain, ArrayList<Position> playerPositions,
+            ArrayList<Position> treePositions) {
         this.grid = grid;
         this.terrain = terrain;
         this.playerPositions = playerPositions;
@@ -37,21 +38,23 @@ public class Map {
 
         return smoothedData;
     }
+
     // interpolate array
     public int[] interpolateArray(int[] originalArray, int targetLength) {
-        float interpolationFactor = (float)originalArray.length / targetLength;
+        float interpolationFactor = (float) originalArray.length / targetLength;
         int[] interpolatedArray = new int[targetLength];
         for (int i = 0; i < targetLength; i++) {
             float originalIndex = i * interpolationFactor;
-            int lowerIndex = (int)Math.floor(originalIndex);
-            int upperIndex = Math.min((int)Math.ceil(originalIndex), originalArray.length - 1);
+            int lowerIndex = (int) Math.floor(originalIndex);
+            int upperIndex = Math.min((int) Math.ceil(originalIndex), originalArray.length - 1);
             float fraction = originalIndex - lowerIndex;
-            interpolatedArray[i] = (int)(originalArray[lowerIndex] * (1 - fraction) + originalArray[upperIndex] * fraction);
+            interpolatedArray[i] = (int) (originalArray[lowerIndex] * (1 - fraction)
+                    + originalArray[upperIndex] * fraction);
         }
         return interpolatedArray;
     }
 
-    //get heightsArray
+    // get heightsArray
     public int[] heightsArray(int[][] terrain) {
         int[] maxValues = new int[28];
         int rows = terrain.length;
@@ -64,15 +67,14 @@ public class Map {
                     max = terrain[row][col];
                 }
             }
-            maxValues[col] = max*32;
+            maxValues[col] = max * 32;
         }
         return maxValues;
-        }
-
+    }
 
     // print map
     public void printMap() {
-        for (int[] t: terrain) {
+        for (int[] t : terrain) {
             for (int i : t) {
                 System.out.print(i);
             }

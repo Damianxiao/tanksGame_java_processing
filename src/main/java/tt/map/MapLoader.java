@@ -39,7 +39,7 @@ public class MapLoader {
                 } else if (ch == 'T') {
                     treePositions.add(new Position(x* 25, y* 32));
                 } else if (Character.isLetter(ch)) {
-                    playerPositions.add(new Position(x* 32 + 16, y* 32+16 ,ch));
+                    playerPositions.add(new Position(x* 32 , y* 32 ,ch));
                 }
             }
         }

@@ -18,7 +18,6 @@ public class Processing extends PApplet {
     private int lastSwitchTime = 0;
     private boolean showArrow = true;
     private int selectedLevel = -1;
-    private String[] levelNames = {"Level1", "Level2", "Level3"}; // 关卡名称数组
     private JSONObject config;
     private final String levelPath = "src/main/resources/level/";
     private final String picPath = "src/main/resources/pic/";
@@ -31,7 +30,7 @@ public class Processing extends PApplet {
     @Override
     public void settings() {
         size(864, 640);
-        config = loadJSONObject(levelPath+"config.json");
+        config = loadJSONObject(levelPath + "config.json");
     }
 
     // draw map
@@ -51,13 +50,14 @@ public class Processing extends PApplet {
             }
         } else {
             clearStartScreen();
-//            startGame();
+            // startGame();
             drawGame();
             for (int i = 0; i < tanks.size(); i++) {
                 Tank tank = tanks.get(i);
                 if (i == currentPlayerIndex && showArrow) {
                     fill(0);
-                    triangle(tank.getX() - 10, tank.getY()-60, tank.getX() + 10, tank.getY()-60,tank.getX(),tank.getY() - 30);
+                    triangle(tank.getX() - 10, tank.getY() - 60, tank.getX() + 10, tank.getY() - 60, tank.getX(),
+                            tank.getY() - 30);
                 }
                 drawHUD();
             }
@@ -67,45 +67,17 @@ public class Processing extends PApplet {
         } else {
             showArrow = false;
         }
-//        rect(tank.getX() * 10, tank.getY() * 10, 10, 10);
-//        drawTankAngle(tank.getAngle());
-//        rotateAnimation();
+        // rect(tank.getX() * 10, tank.getY() * 10, 10, 10);
+        // drawTankAngle(tank.getAngle());
+        // rotateAnimation();
     }
 
-
-    public void clearStartScreen(){
+    public void clearStartScreen() {
         background(255);
     }
 
-//    public void drawTankAngle(double angle) {
-//        float tankX = tank.getX() + 16;
-//        float tankY = tank.getY() + 16;
-//
-//        beginShape();
-//        vertex(tankX, tankY);
-//        vertex(tankX - 16, tankY - 16);
-//        vertex(tankX + 16, tankY - 16);
-//        endShape();
-//
-//        float angleMarkerX = tankX + cos(radians((float) angle)) * 16;
-//        float angleMarkerY = tankY + sin(radians((float) angle)) * 16;
-//        line(tankX, tankY, angleMarkerX, angleMarkerY);
-//    }
-
-//    private void rotateAnimation() {
-//        beginShape();
-//        vertex(tank.getX() + 16, tank.getY() + 16);
-//        vertex(tank.getX() - 16, tank.getY() - 16);
-//        vertex(tank.getX() + 16, tank.getY() - 16);
-//        endShape();
-//
-//        float angleMarkerX = (float) (tank.getX() + 16 * Math.cos(Math.toRadians(tank.getAngle())));
-//        float angleMarkerY = (float) (tank.getY() + 16 * Math.sin(Math.toRadians(tank.getAngle())));
-//        line(tank.getX(), tank.getY(), angleMarkerX, angleMarkerY);
-//    }
-
     public void keyPressed() {
-        if(selectedLevel == -1){
+        if (selectedLevel == -1) {
             if (key == '1') {
                 selectedLevel = 1;
                 startGame();
@@ -118,9 +90,9 @@ public class Processing extends PApplet {
             }
         }
         currentTank = tanks.get(currentPlayerIndex);
-        if (keyCode == LEFT) {
+        if (keyCode == LEFT && currentTank.getX()>0) {
             int diff = map.getHeightsArray()[currentTank.getX()] - map.getHeightsArray()[currentTank.getX() - 1];
-            if(diff <= 0){
+            if (diff <= 0) {
                 currentTank.move(-1, diff);
                 map.getPlayerPositions().get(currentPlayerIndex).setY(currentTank.getY());
                 map.getPlayerPositions().get(currentPlayerIndex).setX(currentTank.getX());
@@ -131,7 +103,7 @@ public class Processing extends PApplet {
             }
         } else if (keyCode == RIGHT) {
             int diff = map.getHeightsArray()[currentTank.getX()] - map.getHeightsArray()[currentTank.getX() + 1];
-            if(diff <= 0){
+            if (diff <= 0) {
                 currentTank.move(1, diff);
                 map.getPlayerPositions().get(currentPlayerIndex).setY(currentTank.getY());
                 map.getPlayerPositions().get(currentPlayerIndex).setX(currentTank.getX());
@@ -141,15 +113,25 @@ public class Processing extends PApplet {
                 map.getPlayerPositions().get(currentPlayerIndex).setX(currentTank.getX());
             }
         } else if (keyCode == UP) {
-            currentTank.rotateTower(-3);
+            currentTank.rotateTower(1);
+            for(Position p : map.getPlayerPositions()){
+                if(p.getSymbol().charAt(0) == currentTank.getSymbol()){
+                    p.setAngle(currentTank.getAngle());
+                }
+            }
         } else if (keyCode == DOWN) {
-            currentTank.rotateTower(3);
+            currentTank.rotateTower(-1);
+            for(Position p : map.getPlayerPositions()){
+                if(p.getSymbol().charAt(0) == currentTank.getSymbol()){
+                    p.setAngle(currentTank.getAngle());
+                }
+            }
         } else if (key == 'W') {
-//            power += 5;
+            // power += 5;
         } else if (key == 'S') {
-//            power -= 5;
+            // power -= 5;
         } else if (key == ' ') {
-//            shoot();
+            // shoot();
             currentPlayerIndex = (currentPlayerIndex + 1) % tanks.size();
             lastSwitchTime = millis();
             drawHUD();
@@ -164,7 +146,8 @@ public class Processing extends PApplet {
         String terrianColorStr = level.getString("foreground-color");
         String[] terrainColorArr = terrianColorStr.split(",");
         JSONObject playerNames = config.getJSONObject("player_color");
-        int terrainColor = color(Integer.parseInt(terrainColorArr[0]), Integer.parseInt(terrainColorArr[1]), Integer.parseInt(terrainColorArr[2]));
+        int terrainColor = color(Integer.parseInt(terrainColorArr[0]), Integer.parseInt(terrainColorArr[1]),
+                Integer.parseInt(terrainColorArr[2]));
         String treeFileName = level.getString("trees");
         // load map
         map = MapLoader.loadMap(levelPath + levelFileName);
@@ -172,70 +155,87 @@ public class Processing extends PApplet {
         map.setTerrainColor(terrainColor);
         map.setPlayerNames(playerNames);
         map.setTreeFileName(treeFileName);
-        // init tank
-        for(Position p:map.getPlayerPositions()){
-            Tank tank = new Tank(p.getSymbol().charAt(0),p.getX() ,p.getY() ,100,true,0,50,100);
-            tanks.add(tank);
-        }
         int heights[] = map.heightsArray(map.getTerrain());
-        //extend heights array
-        int extendedHeights[] = map.interpolateArray(heights, 28*32);
+        // extend heights array
+        int extendedHeights[] = map.interpolateArray(heights, 28 * 32);
         // smooth heights
         int smoothHeights[] = map.smoothData(extendedHeights, 32);
         smoothHeights = map.smoothData(smoothHeights, 32);
         smoothHeights = map.smoothData(smoothHeights, 32);
         map.setHeightsArray(smoothHeights);
+        // set player y position
+        for(Position p : map.getPlayerPositions()){
+            p.setY(640-smoothHeights[p.getX()]-16);
+        }
+        // init tank
+        for (Position p : map.getPlayerPositions()) {
+            Tank tank = new Tank(p.getSymbol().charAt(0), p.getX(), p.getY(), 100, true, 0, 50, 100);
+            tanks.add(tank);
+            p.setAngle(tank.getAngle());
+        }
+
     }
+
     // draw HUD
     public void drawHUD() {
-        fill(255,255,255);
+        fill(255, 255, 255);
         rect(0, 0, 864, 60);
         textSize(20);
         fill(0);
         text("Player " + tanks.get(currentPlayerIndex).getSymbol() + "'s turn!", 100, 10);
         text("Health: " + tanks.get(currentPlayerIndex).getLife(), 80, 40);
-        text("Power: " + tanks.get(currentPlayerIndex).getPower(), 180, 40);
-        text("Fuel: " + tanks.get(currentPlayerIndex).getPower(), 280, 40);
+        text("Power: " + tanks.get(currentPlayerIndex).getPower(), 200, 40);
+        text("Fuel: " + tanks.get(currentPlayerIndex).getPower(), 300, 40);
     }
 
-    public void drawGame(){
+    public void drawGame() {
         PImage bgImage = loadImage(picPath + map.getBackgroundFileName());
         background(bgImage);
-        drawMap(map.getTerrain(), map.getTerrainColor(),map.getHeightsArray());
-        drawPlayers(map.getPlayerPositions(),map.getPlayerNames());
-        //draw tree
+        drawMap(map.getTerrain(), map.getTerrainColor(), map.getHeightsArray());
+        drawPlayers(map.getPlayerPositions(), map.getPlayerNames());
+        // draw tree
         String treeFileName = map.getTreeFileName();
         if (treeFileName != null) {
             PImage treeImage = loadImage(picPath + treeFileName);
             for (Position treePos : map.getTreePositions()) {
-                image(treeImage, treePos.getX(), treePos.getY() );
+                image(treeImage, treePos.getX(), treePos.getY());
             }
         }
     }
 
     // draw terrain
-    public void drawMap(int[][] terrain, int terrainColor,int smoothHeights[]) {
-        for(int y=0;y<smoothHeights.length;y++){
+    public void drawMap(int[][] terrain, int terrainColor, int smoothHeights[]) {
+        for (int y = 0; y < smoothHeights.length; y++) {
             fill(terrainColor);
-            rect(y , 640 - smoothHeights[y], 1, smoothHeights[y]);
+            rect(y, 640-smoothHeights[y], 1, smoothHeights[y]);
         }
     }
 
     // draw players
-    public void drawPlayers(ArrayList<Position> playerPositions,JSONObject playerNames) {
+    public void drawPlayers(ArrayList<Position> playerPositions, JSONObject playerNames) {
         String[] rgb;
-        for(Position playerPos : playerPositions){
+        for (Position playerPos : playerPositions) {
             rgb = playerNames.getString(playerPos.getSymbol()).split(",");
             fill(color(Integer.parseInt(rgb[0]), Integer.parseInt(rgb[1]), Integer.parseInt(rgb[2])));
-            ellipse(playerPos.getX() , playerPos.getY() , 40, 20);
-//            rect(playerPos.getX() , playerPos.getY() , 40, 20);
+//            ellipse(playerPos.getX(), playerPos.getY(), 40, 20);
+            // tank body
+            rect(playerPos.getX() , playerPos.getY() , 25, 10);
+            //tower body
+            rect(playerPos.getX()+2 , playerPos.getY()-5 , 20, 5);
+             //wheel
+            ellipse(playerPos.getX()+6 , playerPos.getY()+12, 10, 10);
+            ellipse(playerPos.getX()+19, playerPos.getY()+12, 10, 10);
             // draw tower
             pushMatrix();
-            translate(playerPos.getX() , playerPos.getY() );
-            rotate(0);
+            translate(playerPos.getX()+15 , playerPos.getY());
+//            rotate(radians(90));
+            rotate(radians(playerPos.getAngle()));
             fill(color(Integer.parseInt(rgb[0]), Integer.parseInt(rgb[1]), Integer.parseInt(rgb[2])));
-            rect(-2, -20, 4, 25);
+//            ellipse(3, -15, 5, 20);
+            rect(0, 0, 5, 25);
+//            ellipse(0, -10, 5, 25);
             popMatrix();
+
         }
     }
 }
