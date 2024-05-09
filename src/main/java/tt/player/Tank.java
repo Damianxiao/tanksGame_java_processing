@@ -8,9 +8,11 @@ public class Tank {
     private boolean isAlive;
     private int activationTime;
     private double angle;
+    private int power;
+    private int fuel;
 
     // constructor
-    public Tank(char symbol, int x, int y, int life, boolean isAlive, int activationTime) {
+    public Tank(char symbol, int x, int y, int life, boolean isAlive, int activationTime, int power,int fuel) {
         this.symbol = symbol;
         this.x = x;
         this.y = y;
@@ -19,6 +21,8 @@ public class Tank {
         this.activationTime = activationTime;
         // set the default angle to 0
         this.angle = 0;
+        this.power = power;
+        this.fuel = fuel;
     }
 
     // rotateTower emsure the angle is between -90 and 90
@@ -29,6 +33,12 @@ public class Tank {
         } else if (this.angle <= -90) {
             this.angle = -90;
         }
+    }
+
+    //move the tank
+    public void move(int x, int y) {
+        this.x += x;
+        this.y += y;
     }
 
     // getters and setters
@@ -88,5 +98,22 @@ public class Tank {
     public void setActivationTime(int activationTime) {
         this.activationTime = activationTime;
     }
+
+    public int getPower() {
+        return power;
+    }
+
+    public void setPower(int power) {
+        this.power = power;
+    }
+
+    public int getFuel() {
+        return fuel;
+    }
+
+    public void setFuel(int fuel) {
+        this.fuel = fuel;
+    }
+
 
 }

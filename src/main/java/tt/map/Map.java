@@ -1,5 +1,7 @@
 package tt.map;
 
+import processing.data.JSONObject;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,6 +10,11 @@ public class Map {
     private int[][] terrain;
     private ArrayList<Position> playerPositions;
     private ArrayList<Position> treePositions;
+    private int[] heightsArray;
+    private String backgroundFileName;
+    private JSONObject playerNames;
+    private int terrainColor;
+    private String treeFileName;
 
     public Map(List<List<Character>> grid, int[][] terrain, ArrayList<Position> playerPositions, ArrayList<Position> treePositions) {
         this.grid = grid;
@@ -89,5 +96,59 @@ public class Map {
         return treePositions;
     }
 
+    public int[] getHeightsArray() {
+        return heightsArray;
+    }
 
+    public void setHeightsArray(int[] heightsArray) {
+        this.heightsArray = heightsArray;
+    }
+
+    public void setGrid(List<List<Character>> grid) {
+        this.grid = grid;
+    }
+
+    public void setTerrain(int[][] terrain) {
+        this.terrain = terrain;
+    }
+
+    public void setPlayerPositions(ArrayList<Position> playerPositions) {
+        this.playerPositions = playerPositions;
+    }
+
+    public void setTreePositions(ArrayList<Position> treePositions) {
+        this.treePositions = treePositions;
+    }
+
+    public String getBackgroundFileName() {
+        return backgroundFileName;
+    }
+
+    public void setBackgroundFileName(String backgroundFileName) {
+        this.backgroundFileName = backgroundFileName;
+    }
+
+    public JSONObject getPlayerNames() {
+        return playerNames;
+    }
+
+    public void setPlayerNames(JSONObject playerNames) {
+        this.playerNames = playerNames;
+    }
+
+    public int getTerrainColor() {
+        return terrainColor;
+    }
+
+    public void setTerrainColor(int terrainColor) {
+        this.terrainColor = terrainColor;
+    }
+
+    public String getTreeFileName() {
+        return treeFileName;
+    }
+
+    public void setTreeFileName(String treeFileName) {
+        this.treeFileName = treeFileName;
+    }
 }
