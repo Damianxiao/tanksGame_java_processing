@@ -10,6 +10,7 @@ public class Tank {
     private double angle;
     private int power;
     private int fuel;
+    private int parachute = 0;
 
     // constructor
     public Tank(char symbol, int x, int y, int life, boolean isAlive, int activationTime, int power,int fuel) {
@@ -25,6 +26,7 @@ public class Tank {
         this.angle = Math.random() * 180 + 90;
         this.power = power;
         this.fuel = fuel;
+        this.parachute = 3;
     }
 
     // rotateTower emsure the angle is between -90 and 90
@@ -35,6 +37,10 @@ public class Tank {
         } else if (this.angle >270) {
             this.angle = 270;
         }
+    }
+
+    public void parachute(int x, int y){
+        this.y += y;
     }
 
     //move the tank
@@ -117,5 +123,22 @@ public class Tank {
         this.fuel = fuel;
     }
 
+    public boolean hasParachute() {
+        return parachute > 0;
+    }
 
+    public void reduceLife(int v){
+        this.life -=v;
+        if(this.life <= 0){
+            this.isAlive = false;
+        }
+    }
+
+    public int getParachute() {
+        return parachute;
+    }
+
+    public void setParachute(int parachute) {
+        this.parachute = parachute;
+    }
 }

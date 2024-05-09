@@ -5,6 +5,9 @@ import processing.data.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.lang.Math.abs;
+import static java.lang.Math.max;
+
 public class Map {
     private List<List<Character>> grid;
     private int[][] terrain;
@@ -24,12 +27,28 @@ public class Map {
         this.treePositions = treePositions;
     }
 
+    public  void updateTerrain(int col,int power) {
+            int height = heightsArray[col];
+            int powerRange = power/2;
+            for (int i = col - powerRange; i <= col + powerRange; i++) {
+                if (i >= 0 && i < heightsArray.length) {
+                // calculate new height
+                int newHeight = max(0, height - (power - abs(col - i)));
+                heightsArray[i] = newHeight;
+                }
+            }
+
+            // smooth the terrain
+            setHeightsArray(smoothData(getHeightsArray(), 16));
+    }
+
+
     public int[] smoothData(int[] data, int windowSize) {
         int[] smoothedData = new int[data.length];
         for (int i = 0; i < data.length; i++) {
             int sum = 0;
             int count = 0;
-            for (int j = Math.max(0, i - windowSize / 2); j <= Math.min(data.length - 1, i + windowSize / 2); j++) {
+            for (int j = max(0, i - windowSize / 2); j <= Math.min(data.length - 1, i + windowSize / 2); j++) {
                 sum += data[j];
                 count++;
             }

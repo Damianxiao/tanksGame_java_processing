@@ -1,14 +1,18 @@
 package tt;
 
+import javafx.geometry.Pos;
 import processing.core.*;
 import processing.data.JSONObject;
 import tt.map.Map;
 import tt.map.MapLoader;
 import tt.map.Position;
+import tt.player.Bullet;
 import tt.player.Tank;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static tt.player.Bullet.angleConvert;
 
 public class Processing extends PApplet {
     private Map map;
@@ -21,10 +25,12 @@ public class Processing extends PApplet {
     private JSONObject config;
     private final String levelPath = "src/main/resources/level/";
     private final String picPath = "src/main/resources/pic/";
+    private ArrayList<Bullet> projectiles = new ArrayList<>();
 
     public void setup() {
         smooth();
         noStroke();
+        frameRate(60);
     }
 
     @Override
@@ -56,7 +62,7 @@ public class Processing extends PApplet {
                 Tank tank = tanks.get(i);
                 if (i == currentPlayerIndex && showArrow) {
                     fill(0);
-                    triangle(tank.getX() - 10, tank.getY() - 60, tank.getX() + 10, tank.getY() - 60, tank.getX(),
+                    triangle(tank.getX() , tank.getY() - 60, tank.getX() + 20, tank.getY() - 60, tank.getX()+10,
                             tank.getY() - 30);
                 }
                 drawHUD();
@@ -67,9 +73,6 @@ public class Processing extends PApplet {
         } else {
             showArrow = false;
         }
-        // rect(tank.getX() * 10, tank.getY() * 10, 10, 10);
-        // drawTankAngle(tank.getAngle());
-        // rotateAnimation();
     }
 
     public void clearStartScreen() {
@@ -88,55 +91,63 @@ public class Processing extends PApplet {
                 selectedLevel = 3;
                 startGame();
             }
-        }
-        currentTank = tanks.get(currentPlayerIndex);
-        if (keyCode == LEFT && currentTank.getX()>0) {
-            int diff = map.getHeightsArray()[currentTank.getX()] - map.getHeightsArray()[currentTank.getX() - 1];
-            if (diff <= 0) {
-                currentTank.move(-1, diff);
-                map.getPlayerPositions().get(currentPlayerIndex).setY(currentTank.getY());
-                map.getPlayerPositions().get(currentPlayerIndex).setX(currentTank.getX());
-            } else if (diff > 0) {
-                currentTank.move(-1, diff);
-                map.getPlayerPositions().get(currentPlayerIndex).setY(currentTank.getY());
-                map.getPlayerPositions().get(currentPlayerIndex).setX(currentTank.getX());
-            }
-        } else if (keyCode == RIGHT) {
-            int diff = map.getHeightsArray()[currentTank.getX()] - map.getHeightsArray()[currentTank.getX() + 1];
-            if (diff <= 0) {
-                currentTank.move(1, diff);
-                map.getPlayerPositions().get(currentPlayerIndex).setY(currentTank.getY());
-                map.getPlayerPositions().get(currentPlayerIndex).setX(currentTank.getX());
-            } else if (diff > 0) {
-                currentTank.move(1, diff);
-                map.getPlayerPositions().get(currentPlayerIndex).setY(currentTank.getY());
-                map.getPlayerPositions().get(currentPlayerIndex).setX(currentTank.getX());
-            }
-        } else if (keyCode == UP) {
-            currentTank.rotateTower(1);
-            for(Position p : map.getPlayerPositions()){
-                if(p.getSymbol().charAt(0) == currentTank.getSymbol()){
-                    p.setAngle(currentTank.getAngle());
+        } else if (selectedLevel != -1) {
+            currentTank = tanks.get(currentPlayerIndex);
+            if (keyCode == LEFT && currentTank.getX()>0) {
+                int diff = map.getHeightsArray()[currentTank.getX()] - map.getHeightsArray()[currentTank.getX() - 1];
+                if (diff <= 0) {
+                    currentTank.move(-1, diff);
+                    map.getPlayerPositions().get(currentPlayerIndex).setY(currentTank.getY());
+                    map.getPlayerPositions().get(currentPlayerIndex).setX(currentTank.getX());
+                } else if (diff > 0) {
+                    currentTank.move(-1, diff);
+                    map.getPlayerPositions().get(currentPlayerIndex).setY(currentTank.getY());
+                    map.getPlayerPositions().get(currentPlayerIndex).setX(currentTank.getX());
                 }
-            }
-        } else if (keyCode == DOWN) {
-            currentTank.rotateTower(-1);
-            for(Position p : map.getPlayerPositions()){
-                if(p.getSymbol().charAt(0) == currentTank.getSymbol()){
-                    p.setAngle(currentTank.getAngle());
+            } else if (keyCode == RIGHT) {
+                int diff = map.getHeightsArray()[currentTank.getX()] - map.getHeightsArray()[currentTank.getX() + 1];
+                if (diff <= 0) {
+                    currentTank.move(1, diff);
+                    map.getPlayerPositions().get(currentPlayerIndex).setY(currentTank.getY());
+                    map.getPlayerPositions().get(currentPlayerIndex).setX(currentTank.getX());
+                } else if (diff > 0) {
+                    currentTank.move(1, diff);
+                    map.getPlayerPositions().get(currentPlayerIndex).setY(currentTank.getY());
+                    map.getPlayerPositions().get(currentPlayerIndex).setX(currentTank.getX());
                 }
+            } else if (keyCode == UP) {
+                currentTank.rotateTower(3);
+                for(Position p : map.getPlayerPositions()){
+                    if(p.getSymbol().charAt(0) == currentTank.getSymbol()){
+                        p.setAngle(currentTank.getAngle());
+                    }
+                }
+            } else if (keyCode == DOWN) {
+                currentTank.rotateTower(-3);
+                for(Position p : map.getPlayerPositions()){
+                    if(p.getSymbol().charAt(0) == currentTank.getSymbol()){
+                        p.setAngle(currentTank.getAngle());
+                    }
+                }
+            } else if (key == 'W') {
+                // power += 5;
+            } else if (key == 'S') {
+                // power -= 5;
+            } else if (key == ' ') {
+                shoot();
+                lastSwitchTime = millis();
+                drawHUD();
             }
-        } else if (key == 'W') {
-            // power += 5;
-        } else if (key == 'S') {
-            // power -= 5;
-        } else if (key == ' ') {
-            // shoot();
-            currentPlayerIndex = (currentPlayerIndex + 1) % tanks.size();
-            lastSwitchTime = millis();
-            drawHUD();
         }
     }
+
+    public void shoot() {
+        float turretAngle = currentTank.getAngle();
+        Bullet bullet = new Bullet(currentTank.getSymbol(), currentTank.getX(), currentTank.getY(), angleConvert(currentTank.getAngle()), currentTank.getPower());
+        projectiles.add(bullet);
+        currentPlayerIndex = (currentPlayerIndex + 1) % tanks.size();
+    }
+
 
     public void startGame() {
         // get config for selected level
@@ -175,14 +186,82 @@ public class Processing extends PApplet {
         }
 
     }
+    // draw bullet
+    public void drawBullet() {
+        for (Bullet bullet : projectiles) {
+            if(bullet.isActive()){
+                fill(0);
+                ellipse(bullet.getX(), bullet.getY(), 4, 4);
+                bullet.update();
+                // draw explosion
+                if (bullet.isExploded(map)) {
+                    int col = floor(bullet.getX());
+                    int power = bullet.getPower();
+                    // update terrain
+                    map.updateTerrain(col, power);
+                    // check if bullet hit tank
+                    if(checkTankCollision(col, power)){
+                        char symbol = bullet.getSymbol();
+                        for(Tank tank : tanks){
+                            if(tank.getSymbol() == symbol){
+                               // gain score
+                            }
+                        }
+                    }
+                    bullet.setActive(false);
+                }
+            }
+        }
+    }
+
+    public void deployParachute(Tank tank,int col,int power) {
+        if (!tank.hasParachute()) {
+            while(tank.getY()+16 < 640-map.getHeightsArray()[col]){
+                tank.move(0,6);
+                drawPlayers(map.getPlayerPositions(), map.getPlayerNames());
+                tank.reduceLife(6);
+                for(Position p : map.getPlayerPositions()){
+                    if(p.getSymbol().charAt(0) == tank.getSymbol()){
+                        p.setY(tank.getY());
+                    }
+                }
+            }
+        }else{
+            tank.setParachute(tank.getParachute()-1);
+            while(tank.getY() < 640-map.getHeightsArray()[col]){
+                tank.move(0,1);
+                drawPlayers(map.getPlayerPositions(), map.getPlayerNames());
+                for(Position p : map.getPlayerPositions()){
+                    if(p.getSymbol().charAt(0) == tank.getSymbol()){
+                        p.setY(tank.getY());
+                    }
+                }
+            }
+        }
+
+    }
+
+    public boolean checkTankCollision(int col,int power){
+        int powerRange = power/2;
+        for(Tank tank : tanks){
+            if(tank.getX() >= col - powerRange && tank.getX() <= col + powerRange){
+                tank.reduceLife(power);
+                deployParachute(tank,col,power);
+                return true;
+            }
+        }
+        return false;
+    }
 
     // draw HUD
     public void drawHUD() {
-        fill(255, 255, 255);
+        fill(255,255,255);
         rect(0, 0, 864, 60);
         textSize(20);
-        fill(0);
+        // yellow
+        fill(255,153,18);
         text("Player " + tanks.get(currentPlayerIndex).getSymbol() + "'s turn!", 100, 10);
+        textSize(20);
         text("Health: " + tanks.get(currentPlayerIndex).getLife(), 80, 40);
         text("Power: " + tanks.get(currentPlayerIndex).getPower(), 200, 40);
         text("Fuel: " + tanks.get(currentPlayerIndex).getPower(), 300, 40);
@@ -191,6 +270,7 @@ public class Processing extends PApplet {
     public void drawGame() {
         PImage bgImage = loadImage(picPath + map.getBackgroundFileName());
         background(bgImage);
+        drawHUD();
         drawMap(map.getTerrain(), map.getTerrainColor(), map.getHeightsArray());
         drawPlayers(map.getPlayerPositions(), map.getPlayerNames());
         // draw tree
@@ -201,6 +281,7 @@ public class Processing extends PApplet {
                 image(treeImage, treePos.getX(), treePos.getY());
             }
         }
+        drawBullet();
     }
 
     // draw terrain
@@ -232,7 +313,7 @@ public class Processing extends PApplet {
             rotate(radians(playerPos.getAngle()));
             fill(color(Integer.parseInt(rgb[0]), Integer.parseInt(rgb[1]), Integer.parseInt(rgb[2])));
 //            ellipse(3, -15, 5, 20);
-            rect(0, 0, 5, 25);
+            rect(0, 0, 5, 20);
 //            ellipse(0, -10, 5, 25);
             popMatrix();
 
