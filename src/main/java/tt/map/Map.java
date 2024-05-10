@@ -1,6 +1,7 @@
 package tt.map;
 
 import processing.data.JSONObject;
+import tt.player.Tank;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +19,8 @@ public class Map {
     private JSONObject playerNames;
     private int terrainColor;
     private String treeFileName;
+    private ArrayList<Tank> tanks;
+    private String parachuteFileName;
 
     public Map(List<List<Character>> grid, int[][] terrain, ArrayList<Position> playerPositions,
             ArrayList<Position> treePositions) {
@@ -39,7 +42,7 @@ public class Map {
             }
 
             // smooth the terrain
-            setHeightsArray(smoothData(getHeightsArray(), 16));
+            setHeightsArray(smoothData(getHeightsArray(), 32));
     }
 
 
@@ -171,5 +174,21 @@ public class Map {
 
     public void setTreeFileName(String treeFileName) {
         this.treeFileName = treeFileName;
+    }
+
+    public ArrayList<Tank> getTanks() {
+        return tanks;
+    }
+
+    public void setTanks(ArrayList<Tank> tanks) {
+        this.tanks = tanks;
+    }
+
+    public String getParachuteFileName() {
+        return parachuteFileName;
+    }
+
+    public void setParachuteFileName(String parachuteFileName) {
+        this.parachuteFileName = parachuteFileName;
     }
 }

@@ -160,12 +160,14 @@ public class Processing extends PApplet {
         int terrainColor = color(Integer.parseInt(terrainColorArr[0]), Integer.parseInt(terrainColorArr[1]),
                 Integer.parseInt(terrainColorArr[2]));
         String treeFileName = level.getString("trees");
+        String parachuteFileName = level.getString("parachute");
         // load map
         map = MapLoader.loadMap(levelPath + levelFileName);
         map.setBackgroundFileName(backgroundFileName);
         map.setTerrainColor(terrainColor);
         map.setPlayerNames(playerNames);
         map.setTreeFileName(treeFileName);
+        map.setParachuteFileName(parachuteFileName);
         int heights[] = map.heightsArray(map.getTerrain());
         // extend heights array
         int extendedHeights[] = map.interpolateArray(heights, 28 * 32);
@@ -203,6 +205,7 @@ public class Processing extends PApplet {
                     if(checkTankCollision(col, power)){
                         char symbol = bullet.getSymbol();
                         for(Tank tank : tanks){
+                            // if terrain collision tank use parachute on the ground
                             if(tank.getSymbol() == symbol){
                                // gain score
                             }
@@ -214,31 +217,34 @@ public class Processing extends PApplet {
         }
     }
 
-    public void deployParachute(Tank tank,int col,int power) {
-        if (!tank.hasParachute()) {
-            while(tank.getY()+16 < 640-map.getHeightsArray()[col]){
-                tank.move(0,6);
-                drawPlayers(map.getPlayerPositions(), map.getPlayerNames());
-                tank.reduceLife(6);
-                for(Position p : map.getPlayerPositions()){
-                    if(p.getSymbol().charAt(0) == tank.getSymbol()){
-                        p.setY(tank.getY());
+    public void deployParachute(Tank tank,int col) {
+            if (!tank.hasParachute()) {
+                if(tank.getY() +16 < 640-map.getHeightsArray()[col]){
+                    tank.move(0,5);
+                    drawPlayers(map.getPlayerPositions(), map.getPlayerNames());
+                    tank.reduceLife(5);
+                    for(Position p : map.getPlayerPositions()){
+                        if(p.getSymbol().charAt(0) == tank.getSymbol()){
+                            p.setY(tank.getY());
+                        }
                     }
                 }
-            }
-        }else{
-            tank.setParachute(tank.getParachute()-1);
-            while(tank.getY() < 640-map.getHeightsArray()[col]){
-                tank.move(0,1);
-                drawPlayers(map.getPlayerPositions(), map.getPlayerNames());
-                for(Position p : map.getPlayerPositions()){
-                    if(p.getSymbol().charAt(0) == tank.getSymbol()){
-                        p.setY(tank.getY());
+            }else if(tank.hasParachute() && 640-map.getHeightsArray()[col] - tank.getY() > 25){
+                tank.setParachute(tank.getParachute()-1);
+                // tip to remind parachute
+                PImage parachuteImage = loadImage(picPath+map.getParachuteFileName());
+                image(parachuteImage, tank.getX() - parachuteImage.width / 2+5, tank.getY() - parachuteImage.height / 2+5);
+                if(tank.getY() < 640-map.getHeightsArray()[col]){
+                    tank.move(0,1);
+                    drawPlayers(map.getPlayerPositions(), map.getPlayerNames());
+                    for(Position p : map.getPlayerPositions()){
+                        if(p.getSymbol().charAt(0) == tank.getSymbol()){
+                            p.setY(tank.getY());
+                        }
                     }
                 }
-            }
-        }
 
+            }
     }
 
     public boolean checkTankCollision(int col,int power){
@@ -246,7 +252,6 @@ public class Processing extends PApplet {
         for(Tank tank : tanks){
             if(tank.getX() >= col - powerRange && tank.getX() <= col + powerRange){
                 tank.reduceLife(power);
-                deployParachute(tank,col,power);
                 return true;
             }
         }
@@ -282,6 +287,13 @@ public class Processing extends PApplet {
             }
         }
         drawBullet();
+        // draw collision fall
+        for(Tank tank:tanks){
+            if(tank.getY() <640-map.getHeightsArray()[tank.getX()]){
+                deployParachute(tank,tank.getX());
+            }
+        }
+        System.out.println(tanks.get(0).getY()+" "+map.getHeightsArray()[tanks.get(0).getX()]);
     }
 
     // draw terrain
@@ -316,7 +328,6 @@ public class Processing extends PApplet {
             rect(0, 0, 5, 20);
 //            ellipse(0, -10, 5, 25);
             popMatrix();
-
         }
     }
 }
