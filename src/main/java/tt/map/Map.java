@@ -6,8 +6,8 @@ import tt.player.Tank;
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.lang.Math.abs;
-import static java.lang.Math.max;
+import static java.lang.Math.*;
+import static processing.core.PApplet.dist;
 
 public class Map {
     private List<List<Character>> grid;
@@ -23,26 +23,25 @@ public class Map {
     private String parachuteFileName;
 
     public Map(List<List<Character>> grid, int[][] terrain, ArrayList<Position> playerPositions,
-            ArrayList<Position> treePositions) {
+               ArrayList<Position> treePositions) {
         this.grid = grid;
         this.terrain = terrain;
         this.playerPositions = playerPositions;
         this.treePositions = treePositions;
     }
 
-    public  void updateTerrain(int col,int power) {
-            int height = heightsArray[col];
-            int powerRange = power/2;
-            for (int i = col - powerRange; i <= col + powerRange; i++) {
-                if (i >= 0 && i < heightsArray.length) {
+    public void updateTerrain(int col, int power) {
+        int height = heightsArray[col];
+        int powerRange = power / 2;
+        for (int i = col - powerRange; i <= col + powerRange; i++) {
+            if (i >= 0 && i < heightsArray.length) {
                 // calculate new height
                 int newHeight = max(0, height - (power - abs(col - i)));
                 heightsArray[i] = newHeight;
-                }
             }
-
-            // smooth the terrain
-            setHeightsArray(smoothData(getHeightsArray(), 32));
+        }
+        // smooth the terrain
+        setHeightsArray(smoothData(getHeightsArray(), 5));
     }
 
 
@@ -51,7 +50,7 @@ public class Map {
         for (int i = 0; i < data.length; i++) {
             int sum = 0;
             int count = 0;
-            for (int j = max(0, i - windowSize / 2); j <= Math.min(data.length - 1, i + windowSize / 2); j++) {
+            for (int j = max(0, i - windowSize / 2); j <= min(data.length - 1, i + windowSize / 2); j++) {
                 sum += data[j];
                 count++;
             }
@@ -68,7 +67,7 @@ public class Map {
         for (int i = 0; i < targetLength; i++) {
             float originalIndex = i * interpolationFactor;
             int lowerIndex = (int) Math.floor(originalIndex);
-            int upperIndex = Math.min((int) Math.ceil(originalIndex), originalArray.length - 1);
+            int upperIndex = min((int) Math.ceil(originalIndex), originalArray.length - 1);
             float fraction = originalIndex - lowerIndex;
             interpolatedArray[i] = (int) (originalArray[lowerIndex] * (1 - fraction)
                     + originalArray[upperIndex] * fraction);

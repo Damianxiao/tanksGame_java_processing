@@ -1,14 +1,14 @@
 package tt;
 
-import javafx.geometry.Pos;
+
 import processing.core.*;
 import processing.data.JSONObject;
 import tt.map.Map;
 import tt.map.MapLoader;
 import tt.map.Position;
 import tt.player.Bullet;
+import tt.player.Explosion;
 import tt.player.Tank;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,11 +26,13 @@ public class Processing extends PApplet {
     private final String levelPath = "src/main/resources/level/";
     private final String picPath = "src/main/resources/pic/";
     private ArrayList<Bullet> projectiles = new ArrayList<>();
+    private Explosion  explosion;
+    private boolean isExpFinished = true;
 
     public void setup() {
         smooth();
         noStroke();
-        frameRate(60);
+//        frameRate(60);
     }
 
     @Override
@@ -145,7 +147,6 @@ public class Processing extends PApplet {
         float turretAngle = currentTank.getAngle();
         Bullet bullet = new Bullet(currentTank.getSymbol(), currentTank.getX(), currentTank.getY(), angleConvert(currentTank.getAngle()), currentTank.getPower());
         projectiles.add(bullet);
-        currentPlayerIndex = (currentPlayerIndex + 1) % tanks.size();
     }
 
 
@@ -180,6 +181,11 @@ public class Processing extends PApplet {
         for(Position p : map.getPlayerPositions()){
             p.setY(640-smoothHeights[p.getX()]-16);
         }
+        // set the tree position
+        for(Position p : map.getTreePositions()){
+            p.setY(640-smoothHeights[p.getX()]);
+        }
+
         // init tank
         for (Position p : map.getPlayerPositions()) {
             Tank tank = new Tank(p.getSymbol().charAt(0), p.getX(), p.getY(), 100, true, 0, 50, 100);
@@ -193,7 +199,7 @@ public class Processing extends PApplet {
         for (Bullet bullet : projectiles) {
             if(bullet.isActive()){
                 fill(0);
-                ellipse(bullet.getX(), bullet.getY(), 4, 4);
+                ellipse(bullet.getX()+12, bullet.getY(), 4, 4);
                 bullet.update();
                 // draw explosion
                 if (bullet.isExploded(map)) {
@@ -201,6 +207,9 @@ public class Processing extends PApplet {
                     int power = bullet.getPower();
                     // update terrain
                     map.updateTerrain(col, power);
+                    // explosion effect
+                    isExpFinished =false;
+                    explosion = new Explosion(bullet.getX(),bullet.getY(),bullet.getPower());
                     // check if bullet hit tank
                     if(checkTankCollision(col, power)){
                         char symbol = bullet.getSymbol();
@@ -211,15 +220,44 @@ public class Processing extends PApplet {
                             }
                         }
                     }
+                    // next round
+//                    currentPlayerIndex = (currentPlayerIndex + 1) % tanks.size();
                     bullet.setActive(false);
                 }
+                // next round
+//                if(bullet.isOutOfMap()) {
+//                    currentPlayerIndex = (currentPlayerIndex + 1) % tanks.size();
+//                    bullet.setActive(false);
+//                }
             }
+
+        }
+    }
+
+    public void drawExplosion(){
+        if(!isExpFinished){
+            explosion.update();
+            float x =explosion.getX();
+            float y =explosion.getY();
+            float currentRadiusRed = explosion.getCurrentRadiusRed();
+            float currentRadiusOrange = explosion.getCurrentRadiusOrange();
+            float currentRadiusYellow = explosion.getCurrentRadiusYellow();
+            // Red circle
+            fill(255, 0, 0);
+            ellipse(x, y, currentRadiusRed * 2, currentRadiusRed * 2);
+            // Orange circle
+            fill(255, 165, 0);
+            ellipse(x, y, currentRadiusOrange * 2, currentRadiusOrange * 2);
+            // Yellow circle
+            fill(255, 255, 0);
+            ellipse(x, y, currentRadiusYellow * 2, currentRadiusYellow * 2);
         }
     }
 
     public void deployParachute(Tank tank,int col) {
+        PImage parachuteImage = loadImage(picPath+map.getParachuteFileName());
             if (!tank.hasParachute()) {
-                if(tank.getY() +16 < 640-map.getHeightsArray()[col]){
+                if(tank.getY() < 640-map.getHeightsArray()[col]+16){
                     tank.move(0,5);
                     drawPlayers(map.getPlayerPositions(), map.getPlayerNames());
                     tank.reduceLife(5);
@@ -229,30 +267,38 @@ public class Processing extends PApplet {
                         }
                     }
                 }
-            }else if(tank.hasParachute() && 640-map.getHeightsArray()[col] - tank.getY() > 25){
-                tank.setParachute(tank.getParachute()-1);
+            }else if(tank.hasParachute() && 640-map.getHeightsArray()[col] - tank.getY() > 32){
                 // tip to remind parachute
-                PImage parachuteImage = loadImage(picPath+map.getParachuteFileName());
-                image(parachuteImage, tank.getX() - parachuteImage.width / 2+5, tank.getY() - parachuteImage.height / 2+5);
-                if(tank.getY() < 640-map.getHeightsArray()[col]){
+                image(parachuteImage, tank.getX() - parachuteImage.width / 2 +12, tank.getY() - parachuteImage.height / 2 -20);
+                if(tank.getY() < 640-map.getHeightsArray()[col]-32){
                     tank.move(0,1);
                     drawPlayers(map.getPlayerPositions(), map.getPlayerNames());
                     for(Position p : map.getPlayerPositions()){
                         if(p.getSymbol().charAt(0) == tank.getSymbol()){
                             p.setY(tank.getY());
                         }
+                        if(tank.getY()>= 640-map.getHeightsArray()[col]){
+                            tank.setParachute(tank.getParachute()-1);
+                        }
                     }
                 }
 
             }
     }
-
+    // tank get hit reduce life
     public boolean checkTankCollision(int col,int power){
         int powerRange = power/2;
         for(Tank tank : tanks){
-            if(tank.getX() >= col - powerRange && tank.getX() <= col + powerRange){
-                tank.reduceLife(power);
-                return true;
+            // in the range of explosion
+            int dist = (int) dist(tank.getX(),tank.getY(),col,640-map.getHeightsArray()[col]);
+            if(dist <= powerRange){
+                if(dist < powerRange/2)
+                    tank.reduceLife(power);
+                else if(dist >= powerRange/2 && dist < powerRange){
+                    tank.reduceLife(power/2);
+                } else{
+                    tank.reduceLife(power/4);
+                }
             }
         }
         return false;
@@ -269,11 +315,12 @@ public class Processing extends PApplet {
         textSize(20);
         text("Health: " + tanks.get(currentPlayerIndex).getLife(), 80, 40);
         text("Power: " + tanks.get(currentPlayerIndex).getPower(), 200, 40);
-        text("Fuel: " + tanks.get(currentPlayerIndex).getPower(), 300, 40);
+        text("Fuel: " + tanks.get(currentPlayerIndex).getFuel(), 300, 40);
     }
 
     public void drawGame() {
         PImage bgImage = loadImage(picPath + map.getBackgroundFileName());
+        PImage parachuteImage = loadImage(picPath + map.getParachuteFileName());
         background(bgImage);
         drawHUD();
         drawMap(map.getTerrain(), map.getTerrainColor(), map.getHeightsArray());
@@ -283,18 +330,24 @@ public class Processing extends PApplet {
         if (treeFileName != null) {
             PImage treeImage = loadImage(picPath + treeFileName);
             for (Position treePos : map.getTreePositions()) {
-                image(treeImage, treePos.getX(), treePos.getY());
+                if (treePos.getY() < 640 - map.getHeightsArray()[treePos.getX()]) {
+                    treePos.setY(treePos.getY() + 1);
+                    image(treeImage, treePos.getX(), treePos.getY()-32);
+                } else{
+                    image(treeImage, treePos.getX(), treePos.getY()-32);
+                }
             }
         }
         drawBullet();
+        drawExplosion();
         // draw collision fall
         for(Tank tank:tanks){
-            if(tank.getY() <640-map.getHeightsArray()[tank.getX()]){
+            if(tank.getY()<640-map.getHeightsArray()[tank.getX()]){
                 deployParachute(tank,tank.getX());
             }
         }
-        System.out.println(tanks.get(0).getY()+" "+map.getHeightsArray()[tanks.get(0).getX()]);
     }
+
 
     // draw terrain
     public void drawMap(int[][] terrain, int terrainColor, int smoothHeights[]) {

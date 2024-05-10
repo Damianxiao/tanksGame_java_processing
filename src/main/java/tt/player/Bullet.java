@@ -61,11 +61,6 @@ public class Bullet {
             x += vx;
             y += vy;
         }
-        // if bullet out of map
-        if (isOutOfMap()) {
-           active = false;
-        }
-
     }
 
     // check if bullet is exploded
@@ -116,7 +111,7 @@ public class Bullet {
     }
 
     public boolean isOutOfMap() {
-        return x < 0 || x > 864 || y < 0 || y > 640;
+        return x < 0 || x > 950 || y < 0 || y > 750;
 //        return x < -100 || x > 1000 || y < -100 || y > 800;
     }
 
@@ -155,4 +150,5 @@ public class Bullet {
     public void setActive(boolean active) {
         this.active = active;
     }
+
 }

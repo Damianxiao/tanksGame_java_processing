@@ -1,6 +1,15 @@
 
 
 
+A
+X
+ X
+  X
+   X
+    X
+     X                    X
+       X   TC     T   B X
+          XXXXXXXXXXXXXX
 
 
 
@@ -8,13 +17,3 @@
 
 
 
-    A  TT
-   XXXXX            CXX
-   XXXXXX       TBXXXXXXXX
-X          XXXXXXXXX
-         XXXXXXXXXX
-
-
-
-
-XXXXXXXXXXXXXXXXXXXXXXXXXXX
