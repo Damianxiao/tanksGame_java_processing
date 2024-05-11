@@ -1,5 +1,8 @@
 package tt.map;
 
+import processing.core.PApplet;
+import processing.core.PImage;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -9,8 +12,13 @@ import java.util.List;
 
 import static processing.core.PApplet.loadStrings;
 
-public class MapLoader {
+public class MapLoader extends PApplet {
     public Map map;
+    private final String levelPath = "src/main/resources/level/";
+    private final String picPath = "src/main/resources/pic/";
+
+
+
     // load map file map.txt
     public static Map loadMap(String filePath) {
         List<List<Character>> map = new ArrayList<>();
@@ -44,6 +52,22 @@ public class MapLoader {
             }
         }
         return new Map(map, terrain, playerPositions, treePositions);
+    }
+
+    public Map getMap() {
+        return map;
+    }
+
+    public void setMap(Map map) {
+        this.map = map;
+    }
+
+    public String getLevelPath() {
+        return levelPath;
+    }
+
+    public String getPicPath() {
+        return picPath;
     }
 
 }

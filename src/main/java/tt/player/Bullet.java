@@ -1,6 +1,7 @@
 package tt.player;
 
 import tt.map.Map;
+import tt.map.Wind;
 
 import static java.lang.Math.cos;
 import static java.lang.Math.sin;
@@ -18,6 +19,7 @@ public class Bullet {
     private final float gravity = 3.6f/60;
     private boolean active = true;
     private boolean isExploded = false;
+    private boolean ex = false;
 
     public Bullet(char symbol, int x, int y, int  angle) {
         this.symbol = symbol;
@@ -43,6 +45,20 @@ public class Bullet {
         this.isExploded = false;
     }
 
+    public Bullet(char symbol, int x, int y, int  angle, int power,boolean ex) {
+        this.symbol = symbol;
+        this.x = x;
+        this.y = y;
+        this.angle = angle;
+        this.power = power;
+        float initialVelocity = map(power, 0, 100, 1, 9);
+        this.vx = (float) (initialVelocity * cos(radians(angle)));
+        this.vy = -(float) (initialVelocity * sin(radians(angle)));
+        this.active = true;
+        this.isExploded = false;
+        this.ex = ex;
+    }
+
 
     // angle convert
     public static int angleConvert(int angle) {
@@ -55,9 +71,13 @@ public class Bullet {
     }
 
     // update bullet
-    public void update() {
+    public void update(Wind wind) {
+        // wind affect the bullet x
+        float windAcceleration = (wind.getStrength() * 0.03f/60);
+
         if(active){
             vy += gravity;
+            vx += windAcceleration;
             x += vx;
             y += vy;
         }
@@ -151,4 +171,19 @@ public class Bullet {
         this.active = active;
     }
 
+    public boolean isExploded() {
+        return isExploded;
+    }
+
+    public void setExploded(boolean exploded) {
+        isExploded = exploded;
+    }
+
+    public boolean isEx() {
+        return ex;
+    }
+
+    public void setEx(boolean ex) {
+        this.ex = ex;
+    }
 }

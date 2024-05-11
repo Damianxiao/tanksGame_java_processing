@@ -21,6 +21,14 @@ public class Map {
     private String treeFileName;
     private ArrayList<Tank> tanks;
     private String parachuteFileName;
+    private Wind wind;
+    private String windFileName;
+    private String fuelFileName;
+    private String gasFileName;
+    private String repairFileName;
+    private String exFileName;
+    private String parachuteKitFileName;
+
 
     public Map(List<List<Character>> grid, int[][] terrain, ArrayList<Position> playerPositions,
                ArrayList<Position> treePositions) {
@@ -189,5 +197,61 @@ public class Map {
 
     public void setParachuteFileName(String parachuteFileName) {
         this.parachuteFileName = parachuteFileName;
+    }
+
+    public Wind getWind() {
+        return wind;
+    }
+
+    public void setWind(Wind wind) {
+        this.wind = wind;
+    }
+
+    public String getWindFileName() {
+        return windFileName;
+    }
+
+    public void setWindFileName(String windFileName) {
+        this.windFileName = windFileName;
+    }
+
+    public String getFuelFileName() {
+        return fuelFileName;
+    }
+
+    public void setFuelFileName(String fuelFileName) {
+        this.fuelFileName = fuelFileName;
+    }
+
+    public String getGasFileName() {
+        return gasFileName;
+    }
+
+    public void setGasFileName(String gasFileName) {
+        this.gasFileName = gasFileName;
+    }
+
+    public String getRepairFileName() {
+        return repairFileName;
+    }
+
+    public void setRepairFileName(String repairFileName) {
+        this.repairFileName = repairFileName;
+    }
+
+    public String getExFileName() {
+        return exFileName;
+    }
+
+    public void setExFileName(String exFileName) {
+        this.exFileName = exFileName;
+    }
+
+    public String getParachuteKitFileName() {
+        return parachuteKitFileName;
+    }
+
+    public void setParachuteKitFileName(String parachuteKitFileName) {
+        this.parachuteKitFileName = parachuteKitFileName;
     }
 }
