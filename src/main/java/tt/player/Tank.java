@@ -219,7 +219,7 @@ public class Tank {
         if(this.life <= 0){
             this.isAlive = false;
         }
-//        this.isAlive = false;
+        this.isAlive = false;
     }
 
     public int getParachute() {

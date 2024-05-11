@@ -71,13 +71,6 @@ public class Processing extends PApplet {
                 text((i + 1) + ". Level " + (i + 1), width / 2, 300 + i * 30);
             }
         } else {
-            if (gameEnd) {
-                if (!gameRestarted) {
-                    showWinner();
-                    showFinalScores();
-                    gameRestarted = true;
-                }
-            }
             clearStartScreen();
             // startGame();
             drawGame();
@@ -90,7 +83,17 @@ public class Processing extends PApplet {
                 }
                 drawHUD();
             }
+            if (gameEnd) {
+                if (!gameRestarted) {
+                    showWinner();
+                    showFinalScores();
+
+                    gameRestarted = true;
+                }
+            }
         }
+
+
         if (millis() - lastSwitchTime < 5000) {
             showArrow = true;
         } else {
@@ -99,25 +102,22 @@ public class Processing extends PApplet {
     }
 
     // check if only one tank is alive
-    public void suriveTanks(){
+    public int suriveTanks(){
         int count = 0;
         for (Tank tank : tanks) {
             if (tank.isAlive()) {
                 count++;
             }
         }
-        if (count == 1) {
-            gameEnd = true;
-        }
+        return count;
     }
 
     public void showFinalScores() {
         List<Tank> sortedPlayers = getSortedPlayersByScore();
         int yOffset = 50;
         for (Tank player : sortedPlayers) {
-            fill(player.getSymbol());
+            fill(255,0,0);
             textSize(20);
-            textAlign(CENTER, CENTER);
             text(player.getSymbol() + ": " + player.getScore(), width / 2, height / 2 + yOffset);
             yOffset += 30;
             delay(700);
@@ -127,14 +127,18 @@ public class Processing extends PApplet {
 
     public void showWinner() {
         // get winner
+        String[] rgb;
+        JSONObject playerNames = map.getPlayerNames();
         Tank winner = getHighestScoringPlayer();
-        fill(color(255, 255, 255, 200));
+        rgb = playerNames.getString(String.valueOf(winner.getSymbol())).split(",");
+        fill(color(Integer.parseInt(rgb[0]), Integer.parseInt(rgb[1]), Integer.parseInt(rgb[2]),200));
         rectMode(CENTER);
-        rect(width / 2, height / 2, 400, 200);
-        fill(winner.getSymbol());
+        rect(width/2, height / 2, 600, 400);
+        // get player color
         textSize(30);
         textAlign(CENTER, CENTER);
         text("Player " + winner.getSymbol() + " wins!", width / 2, height / 2 - 20);
+        rectMode(CORNER);
     }
 
 
@@ -218,7 +222,7 @@ public class Processing extends PApplet {
                     currentTank.setShooted(true);
                 }
                 drawHUD();
-            } else if (key == 'r') {
+            } else if (key == 't') {
                 if (currentTank.getScore() >= 20 || currentTank.getToolBag()[0] > 0) {
                     if (currentTank.getLife() < 100) {
                         currentTank.repair();
@@ -238,7 +242,7 @@ public class Processing extends PApplet {
                 if (currentTank.getScore() >= 20 && currentTank.getToolBag()[3] == 0) {
                     currentTank.increasePower();
                 }
-            } else if (key == 'g') {
+            } else if (key == 'r') {
                 restartGame();
             }
         }
@@ -249,8 +253,7 @@ public class Processing extends PApplet {
         gameRestarted = false;
         selectedLevel = -1;
         tanks.clear();
-        projectiles.clear();
-        setup();
+        currentPlayerIndex = 0;
     }
 
     public void shoot() {
@@ -366,9 +369,13 @@ public class Processing extends PApplet {
                     // check if bullet hit tank
                     checkTankCollision(col, power);
 //                     next round
-                    turnSwitch();
-                    map.getWind().update();
-                    bullet.setActive(false);
+                    if(suriveTanks()<=1){
+                        gameEnd = true;
+                    }else{
+                        turnSwitch();
+                        map.getWind().update();
+                        bullet.setActive(false);
+                    }
                 }
                 // next round
                 if (bullet.isOutOfMap()) {
@@ -548,7 +555,16 @@ public class Processing extends PApplet {
             }
         }
         // end game
-        suriveTanks();
+      if(suriveTanks()<=1){
+          showWinner();
+          showFinalScores();
+          gameRestarted = true;
+      }
+        if (gameEnd) {
+            if (!gameRestarted) {
+
+            }
+        }
     }
 
 
