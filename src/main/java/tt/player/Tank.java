@@ -116,23 +116,19 @@ public class Tank {
     }
 
     public void increasePower(){
-        if(this.toolBag[3] != 0){
-            this.canon = true;
-            this.toolBag[3] =0;
-        }else{
-            this.setScore(getScore()-20);
-            this.toolBag[3]=1;
-        }
+       if(!isCanon() && score >= 20) {
+           this.score -= 20;
+           this.canon =true;
+       }
     }
 
-    public void cancelCanon(){
-        this.toolBag[3] =0;
-    }
 
-    private void gainPower(int i) {
-        if(this.power + i > 100) {
+    public void gainPower(int i) {
+        if(i>0&&this.power + i > 100) {
             this.power = 100;
-        }else{
+        } else if (i<0 && this.power<=1) {
+            this.power = 1;
+        } else{
             this.power += i;
         }
     }
@@ -219,7 +215,7 @@ public class Tank {
         if(this.life <= 0){
             this.isAlive = false;
         }
-        this.isAlive = false;
+//        this.isAlive = false;
     }
 
     public int getParachute() {

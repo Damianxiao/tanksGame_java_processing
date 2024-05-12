@@ -29,7 +29,9 @@ public class Processing extends PApplet {
     private final String picPath = "src/main/resources/pic/";
     private ArrayList<Bullet> projectiles = new ArrayList<>();
     private Explosion explosion;
+    private Explosion  tankExplosion;
     private boolean isExpFinished = true;
+    private boolean isTankExpFinished = true;
     private MapLoader mapLoader = new MapLoader();
     private PImage background = null;
     private PImage tree = null;
@@ -87,7 +89,7 @@ public class Processing extends PApplet {
                 if (!gameRestarted) {
                     showWinner();
                     showFinalScores();
-
+                    delay(2000);
                     gameRestarted = true;
                 }
             }
@@ -115,10 +117,13 @@ public class Processing extends PApplet {
     public void showFinalScores() {
         List<Tank> sortedPlayers = getSortedPlayersByScore();
         int yOffset = 50;
+        String [] rgb;
+        JSONObject playerNames = map.getPlayerNames();
         for (Tank player : sortedPlayers) {
-            fill(255,0,0);
-            textSize(20);
-            text(player.getSymbol() + ": " + player.getScore(), width / 2, height / 2 + yOffset);
+            rgb = playerNames.getString(String.valueOf(player.getSymbol())).split(",");
+            fill(color(Integer.parseInt(rgb[0]), Integer.parseInt(rgb[1]), Integer.parseInt(rgb[2])));
+            textSize(30);
+            text(player.getSymbol() + ": " + player.getScore(), 450, 200+yOffset);
             yOffset += 30;
             delay(700);
         }
@@ -131,13 +136,14 @@ public class Processing extends PApplet {
         JSONObject playerNames = map.getPlayerNames();
         Tank winner = getHighestScoringPlayer();
         rgb = playerNames.getString(String.valueOf(winner.getSymbol())).split(",");
-        fill(color(Integer.parseInt(rgb[0]), Integer.parseInt(rgb[1]), Integer.parseInt(rgb[2]),200));
+        fill(color(Integer.parseInt(rgb[0]), Integer.parseInt(rgb[1]), Integer.parseInt(rgb[2]),100));
         rectMode(CENTER);
         rect(width/2, height / 2, 600, 400);
         // get player color
-        textSize(30);
-        textAlign(CENTER, CENTER);
-        text("Player " + winner.getSymbol() + " wins!", width / 2, height / 2 - 20);
+        textSize(40);
+//        textAlign(CENTER, CENTER);
+        fill(255,255,255);
+        text("Player " + winner.getSymbol() + " wins!", 560, 200);
         rectMode(CORNER);
     }
 
@@ -212,37 +218,38 @@ public class Processing extends PApplet {
                         p.setAngle(currentTank.getAngle());
                     }
                 }
-            } else if (key == 'W' && !currentTank.isShooted()) {
-                // power += 5;
-            } else if (key == 'S' && !currentTank.isShooted()) {
-                // power -= 5;
+            } else if (key == 'w' && !currentTank.isShooted() && currentTank.getPower()<=currentTank.getLife()) {
+                currentTank.gainPower(1);
+            } else if (key == 's' && !currentTank.isShooted() && currentTank.getPower()<=currentTank.getLife()) {
+                currentTank.gainPower(-1);
             } else if (key == ' ') {
                 if (!currentTank.isShooted()) {
                     shoot();
                     currentTank.setShooted(true);
+
                 }
                 drawHUD();
-            } else if (key == 't') {
+            } else if (key == 't'&& !currentTank.isShooted()) {
                 if (currentTank.getScore() >= 20 || currentTank.getToolBag()[0] > 0) {
                     if (currentTank.getLife() < 100) {
                         currentTank.repair();
                     }
                 }
-            } else if (key == 'f') {
+            } else if (key == 'f'&& !currentTank.isShooted()) {
                 if (currentTank.getScore() >= 10 || currentTank.getToolBag()[1] > 0) {
                     if (currentTank.getFuel() < 1000) {
                         currentTank.increaseFuel();
                     }
                 }
-            } else if (key == 'p') {
+            } else if (key == 'p'&& !currentTank.isShooted()) {
                 if (currentTank.getScore() >= 15 || currentTank.getToolBag()[2] > 0) {
                     currentTank.increaseParachute();
                 }
-            } else if (key == 'x') {
+            } else if (key == 'x'&& !currentTank.isShooted()) {
                 if (currentTank.getScore() >= 20 && currentTank.getToolBag()[3] == 0) {
                     currentTank.increasePower();
                 }
-            } else if (key == 'r') {
+            } else if (key == 'r' || gameRestarted) {
                 restartGame();
             }
         }
@@ -257,7 +264,7 @@ public class Processing extends PApplet {
     }
 
     public void shoot() {
-        if (currentTank.getToolBag()[3] == 1) {
+        if (currentTank.isCanon()) {
             Bullet bullet = new Bullet(currentTank.getSymbol(), currentTank.getX(), currentTank.getY(), angleConvert(currentTank.getAngle()), currentTank.getPower(), true);
             projectiles.add(bullet);
         } else {
@@ -351,7 +358,6 @@ public class Processing extends PApplet {
                 bullet.update(map.getWind());
                 // draw explosion
                 if (bullet.isExploded(map)) {
-                    currentTank.cancelCanon();
                     int col = floor(bullet.getX());
                     int power = bullet.getPower();
                     // update terrain
@@ -362,7 +368,6 @@ public class Processing extends PApplet {
                     if (bullet.isEx()) {
                         explosion = new Explosion(bullet.getX(), bullet.getY(), bullet.getPower() * 2);
                         currentTank.setCanon(false);
-                        bullet.setEx(false);
                     } else {
                         explosion = new Explosion(bullet.getX(), bullet.getY(), bullet.getPower());
                     }
@@ -422,6 +427,24 @@ public class Processing extends PApplet {
             fill(255, 255, 0);
             ellipse(x, y, currentRadiusYellow * 2, currentRadiusYellow * 2);
         }
+        if(!isTankExpFinished){
+            tankExplosion.update();
+            float x = tankExplosion.getX();
+            float y = tankExplosion.getY();
+            float currentRadiusRed = tankExplosion.getCurrentRadiusRed();
+            float currentRadiusOrange = tankExplosion.getCurrentRadiusOrange();
+            float currentRadiusYellow = tankExplosion.getCurrentRadiusYellow();
+            // Red circle
+            fill(255, 0, 0);
+            ellipse(x, y, currentRadiusRed * 2, currentRadiusRed * 2);
+            // Orange circle
+            fill(255, 165, 0);
+            ellipse(x, y, currentRadiusOrange * 2, currentRadiusOrange * 2);
+            // Yellow circle
+            fill(255, 255, 0);
+            ellipse(x, y, currentRadiusYellow * 2, currentRadiusYellow * 2);
+            isTankExpFinished = true;
+        }
     }
 
 
@@ -434,7 +457,10 @@ public class Processing extends PApplet {
                 tank.move(0, 5);
                 drawPlayers(map.getPlayerPositions(), map.getPlayerNames());
                 tank.reduceLife(5);
-
+                if(!tank.isAlive()){
+                    tankExplosion = new Explosion(tank.getX(), tank.getY(), 15,true);
+                    isTankExpFinished = false;
+                }
                 for (Position p : map.getPlayerPositions()) {
                     if (p.getSymbol().charAt(0) == tank.getSymbol()) {
                         p.setY(tank.getY());
@@ -462,21 +488,21 @@ public class Processing extends PApplet {
 
     // tank get hit reduce life
     public boolean checkTankCollision(int col, int power) {
-        int powerRange = power;
+        int powerRange = 30;
+        if(currentTank.isCanon()){
+            powerRange = 60;
+        }
         for (Tank tank : tanks) {
             // in the range of explosion
-            int dist = (int) dist(tank.getX(), tank.getY(), col, explosion.getY());
-            if (dist <= powerRange) {
-                if (dist < powerRange / 2) {
-                    tank.reduceLife(power);
-                    currentTank.gainScore(power, tank);
-                } else if (dist >= powerRange / 2 && dist < powerRange) {
-                    tank.reduceLife(power / 2);
-                    currentTank.gainScore(power / 2, tank);
-                } else {
-                    tank.reduceLife(power / 4);
-                    currentTank.gainScore(power / 4, tank);
-                }
+            int dist = (int) abs(tank.getX()- col+tank.getY()-explosion.getY())/2 ;
+//            int dist = (int) dist(tank.getX(), tank.getY(), col, explosion.getY());
+            if (dist <= powerRange && !explosion.isTankExplosion()) {
+                tank.reduceLife(powerRange-dist+20);
+                currentTank.gainScore(powerRange-dist, tank);
+            }
+            if(!tank.isAlive()){
+                tankExplosion = new Explosion(tank.getX(), tank.getY(), 15,true);
+                isTankExpFinished = false;
             }
         }
         return false;
@@ -500,7 +526,7 @@ public class Processing extends PApplet {
         image(parachuteKit, 400, 15);
         text(tanks.get(currentPlayerIndex).getToolBag()[2], 440, 15);
         image(ex, 400, 40);
-        if (tanks.get(currentPlayerIndex).getToolBag()[3] == 0) {
+        if (!tanks.get(currentPlayerIndex).isCanon()) {
             fill(0);
             text("Normal Bullet", 530, 40);
         } else {
@@ -608,13 +634,13 @@ public class Processing extends PApplet {
                         rect(0, 0, 5, 20);
                         popMatrix();
                         noStroke();
-                        //draw scoreBoard
+                        //draw scoreBoards
                         textAlign(RIGHT, TOP);
                         textSize(20);
                         int score = tank.getScore();
                         String playerName = String.valueOf(tank.getSymbol());
                         fill(color(Integer.parseInt(rgb[0]), Integer.parseInt(rgb[1]), Integer.parseInt(rgb[2])));
-                        text("Player " + playerName + ": ", width - 60, yOffset);
+                        text("Player " + playerName + ": ", width - 100, yOffset);
                         fill(0);
                         textSize(25);
                         text(score, width - 35, yOffset);

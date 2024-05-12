@@ -12,6 +12,7 @@ public class Explosion extends PApplet {
     private float currentRadiusYellow;
     private float growthRate;
     private int s;
+    private boolean isTankExplosion;
 
 
     // Constructor
@@ -20,6 +21,14 @@ public class Explosion extends PApplet {
         this.y = y;
         this.maxRadius = maxRadius;
         this.s = millis();
+    }
+
+    public Explosion(float x, float y, float maxRadius, boolean isTankExplosion) {
+        this.x = x;
+        this.y = y;
+        this.maxRadius = maxRadius;
+        this.s = millis();
+        this.isTankExplosion = true;
     }
 
 
@@ -98,4 +107,20 @@ public class Explosion extends PApplet {
         this.growthRate = growthRate;
     }
 
+
+    public int getS() {
+        return s;
+    }
+
+    public void setS(int s) {
+        this.s = s;
+    }
+
+    public boolean isTankExplosion() {
+        return isTankExplosion;
+    }
+
+    public void setTankExplosion(boolean tankExplosion) {
+        isTankExplosion = tankExplosion;
+    }
 }
