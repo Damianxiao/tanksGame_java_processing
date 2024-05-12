@@ -28,6 +28,7 @@ public class Map {
     private String repairFileName;
     private String exFileName;
     private String parachuteKitFileName;
+    private String levelName;
 
 
     public Map(List<List<Character>> grid, int[][] terrain, ArrayList<Position> playerPositions,
@@ -253,5 +254,13 @@ public class Map {
 
     public void setParachuteKitFileName(String parachuteKitFileName) {
         this.parachuteKitFileName = parachuteKitFileName;
+    }
+
+    public String getLevelName() {
+        return levelName;
+    }
+
+    public void setLevelName(String levelName) {
+        this.levelName = levelName;
     }
 }

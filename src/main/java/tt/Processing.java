@@ -60,17 +60,22 @@ public class Processing extends PApplet {
     // draw map
     public void draw() {
         if (selectedLevel == -1) {
-            background(255);
-            fill(0);
+//            PImage bgImage = loadImage(picPath + "tankBg.png");
+//            bgImage.resize(864, 640);
+//            background(bgImage);
+            background(0);
+            fill(255,255,255);
+//            stroke(255,255,0,100);
             textAlign(CENTER, CENTER);
-            textSize(40);
+            textSize(80);
             text("Tanks", width / 2, 50);
-            textSize(30);
-            text("Press Number Choose a level:", width / 2, 150);
-            textSize(25);
+            textSize(40);
+            text("Press Number Choose a Level:", width / 2, 150);
+            textSize(40);
+//            noStroke();
             for (int i = 0; i < config.getJSONArray("levels").size(); i++) {
                 JSONObject level = config.getJSONArray("levels").getJSONObject(i);
-                text((i + 1) + ". Level " + (i + 1), width / 2, 300 + i * 30);
+                text((i + 1) + " "+level.get("name"), width / 2, 300 + i * 50);
             }
         } else {
             clearStartScreen();
@@ -277,6 +282,7 @@ public class Processing extends PApplet {
     public void startGame() {
         // get config for selected level
         JSONObject level = config.getJSONArray("levels").getJSONObject(selectedLevel - 1);
+        String levelName = level.getString("name");
         String levelFileName = level.getString("layout");
         String backgroundFileName = level.getString("background");
         String terrianColorStr = level.getString("foreground-color");
@@ -294,6 +300,7 @@ public class Processing extends PApplet {
         String parachuteKitFileName = level.getString("parachute-kit");
         // load map
         map = MapLoader.loadMap(levelPath + levelFileName);
+        map.setLevelName(levelName);
         map.setBackgroundFileName(backgroundFileName);
         map.setTerrainColor(terrainColor);
         map.setPlayerNames(playerNames);

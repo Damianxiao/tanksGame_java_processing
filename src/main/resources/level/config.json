@@ -1,6 +1,7 @@
 {
   "levels": [
     {
+      "name": "mountain",
       "layout": "level1.txt",
       "background": "background1.png",
       "foreground-color": "255,255,255",
@@ -14,6 +15,7 @@
       "parachute-kit": "parachute-kit.png"
     },
     {
+      "name": "hills",
       "layout": "level2.txt",
       "background": "background2.png",
       "foreground-color": "234,221,181",
@@ -27,6 +29,7 @@
       "parachute-kit": "parachute-kit.png"
     },
     {
+      "name": "beach",
       "layout": "level3.txt",
       "background": "background3.png",
       "foreground-color": "120,171,0",
