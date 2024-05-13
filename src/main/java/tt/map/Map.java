@@ -40,17 +40,21 @@ public class Map {
     }
 
     public void updateTerrain(int col, int power) {
-        int height = heightsArray[col];
-        int powerRange = power / 2;
-        for (int i = col - powerRange; i <= col + powerRange; i++) {
-            if (i >= 0 && i < heightsArray.length) {
-                // calculate new height
-                int newHeight = max(0, height - (power - abs(col - i)));
-                heightsArray[i] = newHeight;
+        if(col < 0 || col >= heightsArray.length){
+            return;
+        }else{
+            int height = heightsArray[col];
+            int powerRange = power / 2;
+            for (int i = col - powerRange; i <= col + powerRange; i++) {
+                if (i >= 0 && i < heightsArray.length) {
+                    // calculate new height
+                    int newHeight = max(0, height - (power - abs(col - i)));
+                    heightsArray[i] = newHeight;
+                }
             }
+            // smooth the terrain
+            setHeightsArray(smoothData(getHeightsArray(), 5));
         }
-        // smooth the terrain
-        setHeightsArray(smoothData(getHeightsArray(), 5));
     }
 
 
@@ -100,16 +104,6 @@ public class Map {
             maxValues[col] = max * 32;
         }
         return maxValues;
-    }
-
-    // print map
-    public void printMap() {
-        for (int[] t : terrain) {
-            for (int i : t) {
-                System.out.print(i);
-            }
-            System.out.println();
-        }
     }
 
     public List<List<Character>> getGrid() {

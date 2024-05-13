@@ -29,7 +29,7 @@ public class Processing extends PApplet {
     private final String picPath = "src/main/resources/pic/";
     ArrayList<Bullet> projectiles = new ArrayList<>();
     private Explosion explosion;
-    private Explosion  tankExplosion;
+    private Explosion tankExplosion;
     private boolean isExpFinished = true;
     private boolean isTankExpFinished = true;
     private MapLoader mapLoader = new MapLoader();
@@ -64,7 +64,7 @@ public class Processing extends PApplet {
 //            bgImage.resize(864, 640);
 //            background(bgImage);
             background(0);
-            fill(255,255,255);
+            fill(255, 255, 255);
 //            stroke(255,255,0,100);
             textAlign(CENTER, CENTER);
             textSize(80);
@@ -75,7 +75,7 @@ public class Processing extends PApplet {
 //            noStroke();
             for (int i = 0; i < config.getJSONArray("levels").size(); i++) {
                 JSONObject level = config.getJSONArray("levels").getJSONObject(i);
-                text((i + 1) + " "+level.get("name"), width / 2, 300 + i * 50);
+                text((i + 1) + " " + level.get("name"), width / 2, 300 + i * 50);
             }
         } else {
             clearStartScreen();
@@ -109,7 +109,7 @@ public class Processing extends PApplet {
     }
 
     // check if only one tank is alive
-    public int suriveTanks(){
+    public int suriveTanks() {
         int count = 0;
         for (Tank tank : tanks) {
             if (tank.isAlive()) {
@@ -122,13 +122,13 @@ public class Processing extends PApplet {
     public void showFinalScores() {
         List<Tank> sortedPlayers = getSortedPlayersByScore();
         int yOffset = 50;
-        String [] rgb;
+        String[] rgb;
         JSONObject playerNames = map.getPlayerNames();
         for (Tank player : sortedPlayers) {
             rgb = playerNames.getString(String.valueOf(player.getSymbol())).split(",");
             fill(color(Integer.parseInt(rgb[0]), Integer.parseInt(rgb[1]), Integer.parseInt(rgb[2])));
             textSize(30);
-            text(player.getSymbol() + ": " + player.getScore(), 450, 200+yOffset);
+            text(player.getSymbol() + ": " + player.getScore(), 450, 200 + yOffset);
             yOffset += 30;
             delay(700);
         }
@@ -141,13 +141,13 @@ public class Processing extends PApplet {
         JSONObject playerNames = map.getPlayerNames();
         Tank winner = getHighestScoringPlayer();
         rgb = playerNames.getString(String.valueOf(winner.getSymbol())).split(",");
-        fill(color(Integer.parseInt(rgb[0]), Integer.parseInt(rgb[1]), Integer.parseInt(rgb[2]),100));
+        fill(color(Integer.parseInt(rgb[0]), Integer.parseInt(rgb[1]), Integer.parseInt(rgb[2]), 100));
         rectMode(CENTER);
-        rect(width/2, height / 2, 600, 400);
+        rect(width / 2, height / 2, 600, 400);
         // get player color
         textSize(40);
 //        textAlign(CENTER, CENTER);
-        fill(255,255,255);
+        fill(255, 255, 255);
         text("Player " + winner.getSymbol() + " wins!", 560, 200);
         rectMode(CORNER);
     }
@@ -223,9 +223,9 @@ public class Processing extends PApplet {
                         p.setAngle(currentTank.getAngle());
                     }
                 }
-            } else if (key == 'w' && !currentTank.isShooted() && currentTank.getPower()<=currentTank.getLife()) {
+            } else if (key == 'w' && !currentTank.isShooted() && currentTank.getPower() <= currentTank.getLife()) {
                 currentTank.gainPower(1);
-            } else if (key == 's' && !currentTank.isShooted() && currentTank.getPower()<=currentTank.getLife()) {
+            } else if (key == 's' && !currentTank.isShooted() && currentTank.getPower() <= currentTank.getLife()) {
                 currentTank.gainPower(-1);
             } else if (key == ' ') {
                 if (!currentTank.isShooted()) {
@@ -234,26 +234,14 @@ public class Processing extends PApplet {
 
                 }
                 drawHUD();
-            } else if (key == 't'&& !currentTank.isShooted()) {
-                if (currentTank.getScore() >= 20 || currentTank.getToolBag()[0] > 0) {
-                    if (currentTank.getLife() < 100) {
-                        currentTank.repair();
-                    }
-                }
-            } else if (key == 'f'&& !currentTank.isShooted()) {
-                if (currentTank.getScore() >= 10 || currentTank.getToolBag()[1] > 0) {
-                    if (currentTank.getFuel() < 1000) {
-                        currentTank.increaseFuel();
-                    }
-                }
-            } else if (key == 'p'&& !currentTank.isShooted()) {
-                if (currentTank.getScore() >= 15 || currentTank.getToolBag()[2] > 0) {
-                    currentTank.increaseParachute();
-                }
-            } else if (key == 'x'&& !currentTank.isShooted()) {
-                if (currentTank.getScore() >= 20 && currentTank.getToolBag()[3] == 0) {
-                    currentTank.increasePower();
-                }
+            } else if (key == 't' && !currentTank.isShooted()) {
+                currentTank.repair();
+            } else if (key == 'f' && !currentTank.isShooted()) {
+                currentTank.increaseFuel();
+            } else if (key == 'p' && !currentTank.isShooted()) {
+                currentTank.increaseParachute();
+            } else if (key == 'x' && !currentTank.isShooted()) {
+                currentTank.increasePower();
             } else if (key == 'r' || gameRestarted) {
                 restartGame();
             }
@@ -380,9 +368,9 @@ public class Processing extends PApplet {
                     // check if bullet hit tank
                     checkTankCollision(col, power);
 //                     next round
-                    if(suriveTanks()<=1){
+                    if (suriveTanks() <= 1) {
                         gameEnd = true;
-                    }else{
+                    } else {
                         turnSwitch();
                         map.getWind().update();
                         bullet.setActive(false);
@@ -433,7 +421,7 @@ public class Processing extends PApplet {
             fill(255, 255, 0);
             ellipse(x, y, currentRadiusYellow * 2, currentRadiusYellow * 2);
         }
-        if(!isTankExpFinished){
+        if (!isTankExpFinished) {
             tankExplosion.update();
             float x = tankExplosion.getX();
             float y = tankExplosion.getY();
@@ -463,8 +451,8 @@ public class Processing extends PApplet {
                 tank.move(0, 5);
                 drawPlayers(map.getPlayerPositions(), map.getPlayerNames());
                 tank.reduceLife(5);
-                if(!tank.isAlive()){
-                    tankExplosion = new Explosion(tank.getX(), tank.getY(), 15,true);
+                if (!tank.isAlive()) {
+                    tankExplosion = new Explosion(tank.getX(), tank.getY(), 15, true);
                     isTankExpFinished = false;
                 }
                 for (Position p : map.getPlayerPositions()) {
@@ -495,19 +483,19 @@ public class Processing extends PApplet {
     // tank get hit reduce life
     public boolean checkTankCollision(int col, int power) {
         int powerRange = 30;
-        if(currentTank.isCanon()){
+        if (currentTank.isCanon()) {
             powerRange = 60;
         }
         for (Tank tank : tanks) {
             // in the range of explosion
-            int dist = (int) abs(tank.getX()- col+tank.getY()-explosion.getY())/2 ;
+            int dist = (int) abs(tank.getX() - col + tank.getY() - explosion.getY()) / 2;
 //            int dist = (int) dist(tank.getX(), tank.getY(), col, explosion.getY());
             if (dist <= powerRange && !explosion.isTankExplosion()) {
-                tank.reduceLife(powerRange-dist+20);
-                currentTank.gainScore(powerRange-dist, tank);
+                tank.reduceLife(powerRange - dist + 20);
+                currentTank.gainScore(powerRange - dist, tank);
             }
-            if(!tank.isAlive()){
-                tankExplosion = new Explosion(tank.getX(), tank.getY(), 15,true);
+            if (!tank.isAlive()) {
+                tankExplosion = new Explosion(tank.getX(), tank.getY(), 15, true);
                 isTankExpFinished = false;
             }
         }
@@ -587,11 +575,11 @@ public class Processing extends PApplet {
             }
         }
         // end game
-      if(suriveTanks()<=1){
-          showWinner();
-          showFinalScores();
-          gameRestarted = true;
-      }
+        if (suriveTanks() <= 1) {
+            showWinner();
+            showFinalScores();
+            gameRestarted = true;
+        }
         if (gameEnd) {
             if (!gameRestarted) {
 

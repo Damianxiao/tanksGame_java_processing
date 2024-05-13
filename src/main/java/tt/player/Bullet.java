@@ -74,7 +74,6 @@ public class Bullet {
     public void update(Wind wind) {
         // wind affect the bullet x
         float windAcceleration = (wind.getStrength() * 0.03f/60);
-
         if(active){
             vy += gravity;
             vx += windAcceleration;
@@ -102,9 +101,6 @@ public class Bullet {
         return symbol;
     }
 
-    public void setSymbol(char symbol) {
-        this.symbol = symbol;
-    }
 
     public int getX() {
         return x;
@@ -126,41 +122,13 @@ public class Bullet {
         return angle;
     }
 
-    public void setAngle(int  angle) {
-        this.angle = angle;
-    }
-
     public boolean isOutOfMap() {
         return x < 0 || x > 950 || y < 0 || y > 750;
 //        return x < -100 || x > 1000 || y < -100 || y > 800;
     }
 
-    public float getVx() {
-        return vx;
-    }
-
-    public void setVx(float vx) {
-        this.vx = vx;
-    }
-
-    public float getVy() {
-        return vy;
-    }
-
-    public void setVy(float vy) {
-        this.vy = vy;
-    }
-
     public int getPower() {
         return power;
-    }
-
-    public void setPower(int power) {
-        this.power = power;
-    }
-
-    public float getGravity() {
-        return gravity;
     }
 
     public boolean isActive() {
@@ -171,19 +139,9 @@ public class Bullet {
         this.active = active;
     }
 
-    public boolean isExploded() {
-        return isExploded;
-    }
-
-    public void setExploded(boolean exploded) {
-        isExploded = exploded;
-    }
 
     public boolean isEx() {
         return ex;
     }
 
-    public void setEx(boolean ex) {
-        this.ex = ex;
-    }
 }

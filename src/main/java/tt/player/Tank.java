@@ -67,29 +67,34 @@ public class Tank {
     }
 
     public void repair(){
-        if(this.toolBag[0] > 0){
+        //use
+        if(this.toolBag[0] > 0 && this.life < 100){
             gainLife(20);
             this.toolBag[0]--;
-        }else{
+        }else if(score>= 20){
+            //buy
             this.setScore(getScore()-20);
             this.toolBag[0]++;
         }
     }
 
     public void increaseFuel(){
-        if(this.toolBag[1] > 0){
+        if(this.toolBag[1] > 0 && this.fuel < 250){
             gainFuel(200);
             this.toolBag[1]--;
-        }else{
+        }else if(score>= 10){
             this.setScore(getScore()-10);
             this.toolBag[1]++;
         }
     }
 
     public void increaseParachute(){
-        if(this.toolBag[2] >0){
+        if(this.toolBag[2] >0 && this.parachute < 3){
             gainParachute();
             this.toolBag[2]--;
+        } else if (score >= 10) {
+            this.setScore(getScore()-10);
+            this.toolBag[2]++;
         }
     }
 
