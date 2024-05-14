@@ -223,9 +223,9 @@ public class Processing extends PApplet {
                         p.setAngle(currentTank.getAngle());
                     }
                 }
-            } else if (key == 'w' && !currentTank.isShooted() && currentTank.getPower() <= currentTank.getLife()) {
+            } else if (key == 'w' && !currentTank.isShooted()) {
                 currentTank.gainPower(1);
-            } else if (key == 's' && !currentTank.isShooted() && currentTank.getPower() <= currentTank.getLife()) {
+            } else if (key == 's' && !currentTank.isShooted()) {
                 currentTank.gainPower(-1);
             } else if (key == ' ') {
                 if (!currentTank.isShooted()) {
@@ -488,11 +488,12 @@ public class Processing extends PApplet {
         }
         for (Tank tank : tanks) {
             // in the range of explosion
-            int dist = (int) abs(tank.getX() - col + tank.getY() - explosion.getY()) / 2;
+            int dist = (int) abs(tank.getX() - col + tank.getY() - explosion.getY()) / 3;
 //            int dist = (int) dist(tank.getX(), tank.getY(), col, explosion.getY());
             if (dist <= powerRange && !explosion.isTankExplosion()) {
-                tank.reduceLife(powerRange - dist + 20);
-                currentTank.gainScore(powerRange - dist, tank);
+                tank.reduceLife(powerRange - dist + 10);
+                currentTank.gainScore(powerRange - dist + 10, tank);
+                return true;
             }
             if (!tank.isAlive()) {
                 tankExplosion = new Explosion(tank.getX(), tank.getY(), 15, true);

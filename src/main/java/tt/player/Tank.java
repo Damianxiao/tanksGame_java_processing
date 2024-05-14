@@ -92,30 +92,34 @@ public class Tank {
         if(this.toolBag[2] >0 && this.parachute < 3){
             gainParachute();
             this.toolBag[2]--;
-        } else if (score >= 10) {
+        } else if (score >= 10 ) {
             this.setScore(getScore()-10);
             this.toolBag[2]++;
         }
     }
 
-    private void gainParachute() {
+    public void gainParachute() {
         if(this.parachute<3){
             this.parachute++;
         }
     }
 
-    private void gainFuel(int i) {
-        if(this.fuel + i > 250) {
+    public void gainFuel(int i) {
+        if (this.fuel + i > 250) {
             this.fuel = 250;
-        }else{
+        } else if (this.fuel + i < 0) {
+            this.fuel = 0;
+        } else {
             this.fuel += i;
         }
     }
 
-    private void gainLife(int i) {
+    public void gainLife(int i) {
         if(this.life + i > 100) {
             this.life = 100;
-        }else{
+        } else if (this.life + i < 0) {
+            this.life = 0;
+        } else{
             this.life += i;
         }
     }
@@ -129,11 +133,12 @@ public class Tank {
 
 
     public void gainPower(int i) {
-        if(i>0&&this.power + i > 100) {
-            this.power = 100;
-        } else if (i<0 && this.power<=1) {
+        int maxPower = Math.min(100, this.life); // Ensure power is less than or equal to life
+        if (i > 0 && this.power + i > maxPower) {
+            this.power = maxPower;
+        } else if (i < 0 && this.power + i <= 0) {
             this.power = 1;
-        } else{
+        } else {
             this.power += i;
         }
     }

@@ -39,7 +39,7 @@ public class Explosion extends PApplet {
         this.currentRadiusOrange = min((int) (maxRadius * 0.5), (int) (percentComplete * maxRadius * 0.5));
         this.currentRadiusYellow = min((int) (maxRadius * 0.2), (int) (percentComplete * maxRadius * 0.2));
         // explosion is finished
-        if(currentRadiusRed == maxRadius && currentRadiusOrange == (int) (maxRadius * 0.5) && currentRadiusYellow == (int) (maxRadius * 0.2)){
+        if(currentRadiusRed == maxRadius){
             this.currentRadiusRed = 0;
             this.currentRadiusOrange = 0;
             this.currentRadiusYellow = 0;

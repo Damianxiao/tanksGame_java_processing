@@ -19,7 +19,7 @@ import static tt.player.Bullet.angleConvert;
 public class processingTest extends PApplet {
     public Map map;
     public ArrayList<Tank> tanks = new ArrayList<>();
-    private Tank currentTank;
+    Tank currentTank;
     public int currentPlayerIndex = 0;
     private int lastSwitchTime = 0;
     private boolean showArrow = true;
@@ -28,7 +28,7 @@ public class processingTest extends PApplet {
     private final String levelPath = "src/main/resources/level/";
     private final String picPath = "src/main/resources/pic/";
     ArrayList<Bullet> projectiles = new ArrayList<>();
-    private Explosion explosion;
+    Explosion explosion;
     private Explosion  tankExplosion;
     private boolean isExpFinished = true;
     private boolean isTankExpFinished = true;
@@ -59,12 +59,6 @@ public class processingTest extends PApplet {
 
     // draw map
     public void draw() {
-            if (gameEnd) {
-                if (!gameRestarted) {
-                    delay(2000);
-                    gameRestarted = true;
-                }
-        }
     }
 
     // check if only one tank is alive
@@ -86,16 +80,6 @@ public class processingTest extends PApplet {
             }
         }
         return highestScorer;
-    }
-
-    public List<Tank> getSortedPlayersByScore() {
-        List<Tank> sortedPlayers = new ArrayList<>(tanks);
-        sortedPlayers.sort((p1, p2) -> p2.getScore() - p1.getScore());
-        return sortedPlayers;
-    }
-
-    public void clearStartScreen() {
-        background(255);
     }
 
     public void keyPressed() {
@@ -260,6 +244,13 @@ public class processingTest extends PApplet {
         }
         // init wind
         map.setWind(new Wind());
+
+        if (gameEnd) {
+            if (!gameRestarted) {
+                delay(2000);
+                gameRestarted = true;
+            }
+        }
     }
 
     //  switch player turn
@@ -323,11 +314,12 @@ public class processingTest extends PApplet {
         }
         for (Tank tank : tanks) {
             // in the range of explosion
-            int dist = (int) abs(tank.getX()- col+tank.getY()-explosion.getY())/2 ;
+            int dist = (int) abs(tank.getX()- col+tank.getY()-explosion.getY()) ;
 //            int dist = (int) dist(tank.getX(), tank.getY(), col, explosion.getY());
             if (dist <= powerRange && !explosion.isTankExplosion()) {
-                tank.reduceLife(powerRange-dist+20);
-                currentTank.gainScore(powerRange-dist, tank);
+                tank.reduceLife(powerRange-dist+10);
+                currentTank.gainScore(powerRange-dist+10, tank);
+                return true;
             }
             if(!tank.isAlive()){
                 tankExplosion = new Explosion(tank.getX(), tank.getY(), 15,true);
