@@ -1,0 +1,87 @@
+@startuml
+skinparam dpi 30000
+scale 13500 width
+scale 2200 height
+
+class MapLoader {
++ loadMap(levelPath: String): Map
+}
+
+
+class Processing {
++ setup()
++ draw()
++ shoot()
++ startGame()
++ deployParachute(tank: Tank, altitude: int)
++ checkTankCollision(x: int, y: int): boolean
+}
+
+class Explosion {
++ update()
++ isFinished(): boolean
+}
+
+interface TankInterface {
++ rotateTower(angle: double)
++ move(x: int, y: int)
++ repair()
++ increaseFuel()
++ increaseParachute()
++ gainParachute()
++ gainFuel(amount: int)
++ gainLife(amount: int)
++ increasePower()
++ gainPower(amount: int)
+}
+
+class Tank {
++ rotateTower(angle: double)
++ parachute(x: int, y: int)
++ move(x: int, y: int)
++ gainScore(points: int, otherTank: Tank)
++ repair()
++ increaseFuel()
++ increaseParachute()
++ gainParachute()
++ gainFuel(amount: int)
++ gainLife(amount: int)
++ increasePower()
++ gainPower(amount: int)
+}
+
+class Map {
++ updateTerrain(x: int, y: int)
+}
+
+class GameEngine {
+}
+
+class Test {
++ init()
+}
+
+class Main {
++ main(args: String[])
+}
+
+class ConfigReader {
++ getNumLevels(): int
++ getLevel(index: int): JSONObject
++ getPlayerColors(): JSONObject
+}
+
+Processing -- MapLoader
+Processing -- GameEngine
+Processing -- GameRender
+Processing <|-- ConfigReader
+processing.core.PApplet <|-- Processing
+MapLoader -- Map
+processing.core.PApplet <|-- MapLoader
+processing.core.PApplet <|-- Explosion
+processing.core.PApplet <|-- Test
+TankInterface <|.. Tank
+tt.PApplet <|-- Processing
+processing.core.PApplet <|-- Test
+@enduml
+

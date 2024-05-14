@@ -2,7 +2,7 @@ package tt.player;
 
 import static java.lang.Math.abs;
 
-public class Tank {
+public class Tank implements TankInterface{
     private char symbol;
     private int x;
     private int y;
