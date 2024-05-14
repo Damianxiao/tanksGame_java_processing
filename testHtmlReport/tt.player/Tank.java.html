@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Tank.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">tank-test Coverage Results</a> &gt; <a href="index.source.html" class="el_package">tt.player</a> &gt; <span class="el_source">Tank.java</span></div><h1>Tank.java</h1><pre class="source lang-java linenums">package tt.player;
+
+import static java.lang.Math.abs;
+
+public class Tank {
+    private char symbol;
+    private int x;
+    private int y;
+    private int life;
+    private boolean isAlive;
+    private int activationTime;
+    private double angle;
+    private int power;
+    private int fuel;
+<span class="fc" id="L15">    private int parachute = 0;</span>
+    private boolean isShooted;
+    private int score;
+    private int [] toolBag;
+    private boolean canon;
+
+    // constructor
+<span class="fc" id="L22">    public Tank(char symbol, int x, int y, int life, boolean isAlive, int activationTime, int power,int fuel) {</span>
+<span class="fc" id="L23">        this.symbol = symbol;</span>
+<span class="fc" id="L24">        this.x = x;</span>
+<span class="fc" id="L25">        this.y = y;</span>
+<span class="fc" id="L26">        this.life = life;</span>
+<span class="fc" id="L27">        this.isAlive = isAlive;</span>
+<span class="fc" id="L28">        this.activationTime = activationTime;</span>
+        // set the default angle to 0
+//        this.angle = 90;
+        // random between 90 and 270
+<span class="fc" id="L32">        this.angle = Math.random() * 180 + 90;</span>
+<span class="fc" id="L33">        this.power = power;</span>
+<span class="fc" id="L34">        this.fuel = fuel;</span>
+<span class="fc" id="L35">        this.parachute = 3;</span>
+<span class="fc" id="L36">        this.isShooted = false;</span>
+<span class="fc" id="L37">        this.score = 50;</span>
+<span class="fc" id="L38">        this.toolBag = new int[4];</span>
+<span class="fc" id="L39">        this.canon = false;</span>
+<span class="fc" id="L40">    }</span>
+
+    // rotateTower emsure the angle is between 90 and 270
+    public void rotateTower(double angle) {
+<span class="fc" id="L44">        this.angle += angle;</span>
+<span class="fc bfc" id="L45" title="All 2 branches covered.">        if (this.angle &lt; 90) {</span>
+<span class="fc" id="L46">            this.angle = 90;</span>
+<span class="fc bfc" id="L47" title="All 2 branches covered.">        } else if (this.angle &gt;270) {</span>
+<span class="fc" id="L48">            this.angle = 270;</span>
+        }
+<span class="fc" id="L50">    }</span>
+
+    public void parachute(int x, int y){
+<span class="nc" id="L53">        this.y += y;</span>
+<span class="nc" id="L54">    }</span>
+
+    //move the tank
+    public void move(int x, int y) {
+<span class="fc" id="L58">        this.x += x;</span>
+<span class="fc" id="L59">        this.y += y;</span>
+<span class="fc" id="L60">        this.fuel -= abs(x);</span>
+<span class="fc" id="L61">    }</span>
+
+    public void gainScore(int score,Tank t){
+<span class="fc bfc" id="L64" title="All 2 branches covered.">        if(t != this){</span>
+<span class="fc" id="L65">            this.score += score;</span>
+        }
+<span class="fc" id="L67">    }</span>
+
+    public void repair(){
+        //use
+<span class="fc bfc" id="L71" title="All 4 branches covered.">        if(this.toolBag[0] &gt; 0 &amp;&amp; this.life &lt; 100){</span>
+<span class="fc" id="L72">            gainLife(20);</span>
+<span class="fc" id="L73">            this.toolBag[0]--;</span>
+<span class="fc bfc" id="L74" title="All 2 branches covered.">        }else if(score&gt;= 20){</span>
+            //buy
+<span class="fc" id="L76">            this.setScore(getScore()-20);</span>
+<span class="fc" id="L77">            this.toolBag[0]++;</span>
+        }
+<span class="fc" id="L79">    }</span>
+
+    public void increaseFuel(){
+<span class="fc bfc" id="L82" title="All 4 branches covered.">        if(this.toolBag[1] &gt; 0 &amp;&amp; this.fuel &lt; 250){</span>
+<span class="fc" id="L83">            gainFuel(200);</span>
+<span class="fc" id="L84">            this.toolBag[1]--;</span>
+<span class="fc bfc" id="L85" title="All 2 branches covered.">        }else if(score&gt;= 10){</span>
+<span class="fc" id="L86">            this.setScore(getScore()-10);</span>
+<span class="fc" id="L87">            this.toolBag[1]++;</span>
+        }
+<span class="fc" id="L89">    }</span>
+
+    public void increaseParachute(){
+<span class="fc bfc" id="L92" title="All 4 branches covered.">        if(this.toolBag[2] &gt;0 &amp;&amp; this.parachute &lt; 3){</span>
+<span class="fc" id="L93">            gainParachute();</span>
+<span class="fc" id="L94">            this.toolBag[2]--;</span>
+<span class="fc bfc" id="L95" title="All 2 branches covered.">        } else if (score &gt;= 10 ) {</span>
+<span class="fc" id="L96">            this.setScore(getScore()-10);</span>
+<span class="fc" id="L97">            this.toolBag[2]++;</span>
+        }
+<span class="fc" id="L99">    }</span>
+
+    public void gainParachute() {
+<span class="fc bfc" id="L102" title="All 2 branches covered.">        if(this.parachute&lt;3){</span>
+<span class="fc" id="L103">            this.parachute++;</span>
+        }
+<span class="fc" id="L105">    }</span>
+
+    public void gainFuel(int i) {
+<span class="fc bfc" id="L108" title="All 2 branches covered.">        if (this.fuel + i &gt; 250) {</span>
+<span class="fc" id="L109">            this.fuel = 250;</span>
+<span class="fc bfc" id="L110" title="All 2 branches covered.">        } else if (this.fuel + i &lt; 0) {</span>
+<span class="fc" id="L111">            this.fuel = 0;</span>
+        } else {
+<span class="fc" id="L113">            this.fuel += i;</span>
+        }
+<span class="fc" id="L115">    }</span>
+
+    public void gainLife(int i) {
+<span class="fc bfc" id="L118" title="All 2 branches covered.">        if(this.life + i &gt; 100) {</span>
+<span class="fc" id="L119">            this.life = 100;</span>
+<span class="fc bfc" id="L120" title="All 2 branches covered.">        } else if (this.life + i &lt; 0) {</span>
+<span class="fc" id="L121">            this.life = 0;</span>
+        } else{
+<span class="fc" id="L123">            this.life += i;</span>
+        }
+<span class="fc" id="L125">    }</span>
+
+    public void increasePower(){
+<span class="pc bpc" id="L128" title="1 of 4 branches missed.">       if(!isCanon() &amp;&amp; score &gt;= 20) {</span>
+<span class="fc" id="L129">           this.score -= 20;</span>
+<span class="fc" id="L130">           this.canon =true;</span>
+       }
+<span class="fc" id="L132">    }</span>
+
+
+    public void gainPower(int i) {
+<span class="fc" id="L136">        int maxPower = Math.min(100, this.life); // Ensure power is less than or equal to life</span>
+<span class="fc bfc" id="L137" title="All 4 branches covered.">        if (i &gt; 0 &amp;&amp; this.power + i &gt; maxPower) {</span>
+<span class="fc" id="L138">            this.power = maxPower;</span>
+<span class="pc bpc" id="L139" title="1 of 4 branches missed.">        } else if (i &lt; 0 &amp;&amp; this.power + i &lt;= 0) {</span>
+<span class="fc" id="L140">            this.power = 1;</span>
+        } else {
+<span class="fc" id="L142">            this.power += i;</span>
+        }
+<span class="fc" id="L144">    }</span>
+    // getters and setters
+
+    public int getAngle() {
+<span class="fc" id="L148">        return (int) angle;</span>
+    }
+
+    public void setAngle(double angle) {
+<span class="fc" id="L152">        this.angle = angle;</span>
+<span class="fc" id="L153">    }</span>
+
+    public char getSymbol() {
+<span class="fc" id="L156">        return symbol;</span>
+    }
+
+    public int getX() {
+<span class="fc" id="L160">        return x;</span>
+    }
+
+    public void setX(int x) {
+<span class="fc" id="L164">        this.x = x;</span>
+<span class="fc" id="L165">    }</span>
+
+    public int getY() {
+<span class="fc" id="L168">        return y;</span>
+    }
+
+    public void setY(int y) {
+<span class="fc" id="L172">        this.y = y;</span>
+<span class="fc" id="L173">    }</span>
+
+    public int getLife() {
+<span class="fc" id="L176">        return life;</span>
+    }
+
+    public void setLife(int life) {
+<span class="fc" id="L180">        this.life = life;</span>
+<span class="fc" id="L181">    }</span>
+
+    public boolean isAlive() {
+<span class="fc" id="L184">        return isAlive;</span>
+    }
+
+    public void setAlive(boolean alive) {
+<span class="fc" id="L188">        isAlive = alive;</span>
+<span class="fc" id="L189">    }</span>
+
+    public int getActivationTime() {
+<span class="fc" id="L192">        return activationTime;</span>
+    }
+
+    public int getPower() {
+<span class="fc" id="L196">        return power;</span>
+    }
+
+    public void setPower(int power) {
+<span class="fc" id="L200">        this.power = power;</span>
+<span class="fc" id="L201">    }</span>
+
+    public int getFuel() {
+<span class="fc" id="L204">        return fuel;</span>
+    }
+
+    public void setFuel(int fuel) {
+<span class="fc" id="L208">        this.fuel = fuel;</span>
+<span class="fc" id="L209">    }</span>
+
+    public boolean hasParachute() {
+<span class="fc bfc" id="L212" title="All 2 branches covered.">        return parachute &gt; 0;</span>
+    }
+
+    public void reduceLife(int v){
+<span class="fc" id="L216">        this.life -=v;</span>
+<span class="fc bfc" id="L217" title="All 2 branches covered.">        if(this.life &lt;= 0){</span>
+<span class="fc" id="L218">            this.isAlive = false;</span>
+        }
+//        this.isAlive = false;
+<span class="fc" id="L221">    }</span>
+
+    public int getParachute() {
+<span class="fc" id="L224">        return parachute;</span>
+    }
+
+    public void setParachute(int parachute) {
+<span class="fc" id="L228">        this.parachute = parachute;</span>
+<span class="fc" id="L229">    }</span>
+
+    public boolean isShooted() {
+<span class="fc" id="L232">        return isShooted;</span>
+    }
+
+    public void setShooted(boolean shooted) {
+<span class="fc" id="L236">        isShooted = shooted;</span>
+<span class="fc" id="L237">    }</span>
+
+    public int getScore() {
+<span class="fc" id="L240">        return score;</span>
+    }
+
+    public void setScore(int score) {
+<span class="fc" id="L244">        this.score = score;</span>
+<span class="fc" id="L245">    }</span>
+
+    public int[] getToolBag() {
+<span class="fc" id="L248">        return toolBag;</span>
+    }
+
+    public void setToolBag(int[] toolBag) {
+<span class="nc" id="L252">        this.toolBag = toolBag;</span>
+<span class="nc" id="L253">    }</span>
+
+    public boolean isCanon() {
+<span class="fc" id="L256">        return canon;</span>
+    }
+
+    public void setCanon(boolean canon) {
+<span class="fc" id="L260">        this.canon = canon;</span>
+<span class="fc" id="L261">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

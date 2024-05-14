@@ -34,12 +34,12 @@ public class Tank {
         this.fuel = fuel;
         this.parachute = 3;
         this.isShooted = false;
-        this.score = 50;
+        this.score = 0;
         this.toolBag = new int[4];
         this.canon = false;
     }
 
-    // rotateTower emsure the angle is between -90 and 90
+    // rotateTower emsure the angle is between 90 and 270
     public void rotateTower(double angle) {
         this.angle += angle;
         if (this.angle < 90) {
@@ -156,10 +156,6 @@ public class Tank {
         return symbol;
     }
 
-    public void setSymbol(char symbol) {
-        this.symbol = symbol;
-    }
-
     public int getX() {
         return x;
     }
@@ -194,10 +190,6 @@ public class Tank {
 
     public int getActivationTime() {
         return activationTime;
-    }
-
-    public void setActivationTime(int activationTime) {
-        this.activationTime = activationTime;
     }
 
     public int getPower() {
@@ -258,9 +250,6 @@ public class Tank {
 
     public void setToolBag(int[] toolBag) {
         this.toolBag = toolBag;
-    }
-
-    public void reduceFuel() {
     }
 
     public boolean isCanon() {

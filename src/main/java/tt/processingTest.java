@@ -12,7 +12,6 @@ import tt.player.Explosion;
 import tt.player.Tank;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import static tt.player.Bullet.angleConvert;
 
@@ -21,17 +20,17 @@ public class processingTest extends PApplet {
     public ArrayList<Tank> tanks = new ArrayList<>();
     Tank currentTank;
     public int currentPlayerIndex = 0;
-    private int lastSwitchTime = 0;
+    int lastSwitchTime = 0;
     private boolean showArrow = true;
-    private int selectedLevel = -1;
+    int selectedLevel = -1;
     private JSONObject config;
     private final String levelPath = "src/main/resources/level/";
     private final String picPath = "src/main/resources/pic/";
     ArrayList<Bullet> projectiles = new ArrayList<>();
     Explosion explosion;
-    private Explosion  tankExplosion;
+    Explosion tankExplosion;
     private boolean isExpFinished = true;
-    private boolean isTankExpFinished = true;
+    boolean isTankExpFinished = true;
     private MapLoader mapLoader = new MapLoader();
     public PImage background = null;
     public PImage tree = null;
@@ -41,8 +40,8 @@ public class processingTest extends PApplet {
     public PImage repair = null;
     public PImage ex = null;
     PImage parachuteKit = null;
-    private boolean gameEnd = false;
-    private boolean gameRestarted = false;
+    boolean gameEnd = false;
+    boolean gameRestarted = false;
 
 
     public void setup() {
@@ -62,7 +61,7 @@ public class processingTest extends PApplet {
     }
 
     // check if only one tank is alive
-    public int suriveTanks(){
+    public int suriveTanks() {
         int count = 0;
         for (Tank tank : tanks) {
             if (tank.isAlive()) {
@@ -83,79 +82,54 @@ public class processingTest extends PApplet {
     }
 
     public void keyPressed() {
-            currentTank = tanks.get(currentPlayerIndex);
-            if (keyCode == LEFT && currentTank.getX() > 0 && currentTank.getFuel() > 0 && !currentTank.isShooted()) {
-                int diff = map.getHeightsArray()[currentTank.getX()] - map.getHeightsArray()[currentTank.getX() - 1];
-                if (diff <= 0) {
-                    currentTank.move(-1, diff);
-                    map.getPlayerPositions().get(currentPlayerIndex).setY(currentTank.getY());
-                    map.getPlayerPositions().get(currentPlayerIndex).setX(currentTank.getX());
-                } else if (diff > 0) {
-                    currentTank.move(-1, diff);
-                    map.getPlayerPositions().get(currentPlayerIndex).setY(currentTank.getY());
-                    map.getPlayerPositions().get(currentPlayerIndex).setX(currentTank.getX());
+        currentTank = tanks.get(currentPlayerIndex);
+        if (keyCode == LEFT && currentTank.getX() > 0 && currentTank.getFuel() > 0 && !currentTank.isShooted()) {
+            int diff = map.getHeightsArray()[currentTank.getX()] - map.getHeightsArray()[currentTank.getX() - 1];
+            currentTank.move(-1, diff);
+            map.getPlayerPositions().get(currentPlayerIndex).setY(currentTank.getY());
+            map.getPlayerPositions().get(currentPlayerIndex).setX(currentTank.getX());
+        } else if (keyCode == RIGHT && currentTank.getX() < 864 && currentTank.getFuel() > 0 && !currentTank.isShooted()) {
+            int diff = map.getHeightsArray()[currentTank.getX()] - map.getHeightsArray()[currentTank.getX() + 1];
+            currentTank.move(1, diff);
+            map.getPlayerPositions().get(currentPlayerIndex).setY(currentTank.getY());
+            map.getPlayerPositions().get(currentPlayerIndex).setX(currentTank.getX());
+        } else if (keyCode == UP && !currentTank.isShooted()) {
+            currentTank.rotateTower(3);
+            for (Position p : map.getPlayerPositions()) {
+                if (p.getSymbol().charAt(0) == currentTank.getSymbol()) {
+                    p.setAngle(currentTank.getAngle());
                 }
-            } else if (keyCode == RIGHT && currentTank.getX() < 864 && currentTank.getFuel() > 0 && !currentTank.isShooted()) {
-                int diff = map.getHeightsArray()[currentTank.getX()] - map.getHeightsArray()[currentTank.getX() + 1];
-                if (diff <= 0) {
-                    currentTank.move(1, diff);
-                    map.getPlayerPositions().get(currentPlayerIndex).setY(currentTank.getY());
-                    map.getPlayerPositions().get(currentPlayerIndex).setX(currentTank.getX());
-                } else if (diff > 0) {
-                    currentTank.move(1, diff);
-                    map.getPlayerPositions().get(currentPlayerIndex).setY(currentTank.getY());
-                    map.getPlayerPositions().get(currentPlayerIndex).setX(currentTank.getX());
-                }
-            } else if (keyCode == UP && !currentTank.isShooted()) {
-                currentTank.rotateTower(3);
-                for (Position p : map.getPlayerPositions()) {
-                    if (p.getSymbol().charAt(0) == currentTank.getSymbol()) {
-                        p.setAngle(currentTank.getAngle());
-                    }
-                }
-            } else if (keyCode == DOWN && !currentTank.isShooted()) {
-                currentTank.rotateTower(-3);
-                for (Position p : map.getPlayerPositions()) {
-                    if (p.getSymbol().charAt(0) == currentTank.getSymbol()) {
-                        p.setAngle(currentTank.getAngle());
-                    }
-                }
-            } else if (key == 'w' && !currentTank.isShooted() && currentTank.getPower()<=currentTank.getLife()) {
-                currentTank.gainPower(1);
-            } else if (key == 's' && !currentTank.isShooted() && currentTank.getPower()<=currentTank.getLife()) {
-                currentTank.gainPower(-1);
-            } else if (key == ' ') {
-                if (!currentTank.isShooted()) {
-                    shoot();
-                    currentTank.setShooted(true);
-
-                }
-            } else if (key == 't'&& !currentTank.isShooted()) {
-                if (currentTank.getScore() >= 20 || currentTank.getToolBag()[0] > 0) {
-                    if (currentTank.getLife() < 100) {
-                        currentTank.repair();
-                    }
-                }
-            } else if (key == 'f'&& !currentTank.isShooted()) {
-                if (currentTank.getScore() >= 10 || currentTank.getToolBag()[1] > 0) {
-                    if (currentTank.getFuel() < 1000) {
-                        currentTank.increaseFuel();
-                    }
-                }
-            } else if (key == 'p'&& !currentTank.isShooted()) {
-                if (currentTank.getScore() >= 15 || currentTank.getToolBag()[2] > 0) {
-                    currentTank.increaseParachute();
-                }
-            } else if (key == 'x'&& !currentTank.isShooted()) {
-                if (currentTank.getScore() >= 20 && currentTank.getToolBag()[3] == 0) {
-                    currentTank.increasePower();
-                }
-            } else if (key == 'r' || gameRestarted) {
-                restartGame();
             }
+        } else if (keyCode == DOWN && !currentTank.isShooted()) {
+            currentTank.rotateTower(-3);
+            for (Position p : map.getPlayerPositions()) {
+                if (p.getSymbol().charAt(0) == currentTank.getSymbol()) {
+                    p.setAngle(currentTank.getAngle());
+                }
+            }
+        } else if (key == 'w' && !currentTank.isShooted()) {
+            currentTank.gainPower(1);
+        } else if (key == 's' && !currentTank.isShooted()) {
+            currentTank.gainPower(-1);
+        } else if (key == ' ') {
+            if (!currentTank.isShooted()) {
+                shoot();
+                currentTank.setShooted(true);
+            }
+        } else if (key == 't' && !currentTank.isShooted()) {
+            currentTank.repair();
+        } else if (key == 'f' && !currentTank.isShooted()) {
+            currentTank.increaseFuel();
+        } else if (key == 'p' && !currentTank.isShooted()) {
+            currentTank.increaseParachute();
+        } else if (key == 'x' && !currentTank.isShooted()) {
+            currentTank.increasePower();
+        } else if (key == 'r' || gameRestarted) {
+            restartGame();
+        }
     }
 
-    private void restartGame() {
+    void restartGame() {
         gameEnd = false;
         gameRestarted = false;
         selectedLevel = -1;
@@ -245,13 +219,8 @@ public class processingTest extends PApplet {
         // init wind
         map.setWind(new Wind());
 
-        if (gameEnd) {
-            if (!gameRestarted) {
-                delay(2000);
-                gameRestarted = true;
-            }
-        }
     }
+
 
     //  switch player turn
     public void turnSwitch() {
@@ -278,8 +247,8 @@ public class processingTest extends PApplet {
             if (tank.getY() < 640 - map.getHeightsArray()[col] + 16) {
                 tank.move(0, 5);
                 tank.reduceLife(5);
-                if(!tank.isAlive()){
-                    tankExplosion = new Explosion(tank.getX(), tank.getY(), 15,true);
+                if (!tank.isAlive()) {
+                    tankExplosion = new Explosion(tank.getX(), tank.getY(), 15, true);
                     isTankExpFinished = false;
                 }
                 for (Position p : map.getPlayerPositions()) {
@@ -293,12 +262,10 @@ public class processingTest extends PApplet {
             image(parachuteImage, tank.getX() - parachuteImage.width / 2 + 12, tank.getY() - parachuteImage.height / 2 - 20);
             if (tank.getY() < 640 - map.getHeightsArray()[col] - 32) {
                 tank.move(0, 1);
+                tank.setParachute(tank.getParachute() - 1);
                 for (Position p : map.getPlayerPositions()) {
                     if (p.getSymbol().charAt(0) == tank.getSymbol()) {
                         p.setY(tank.getY());
-                    }
-                    if (tank.getY() >= 640 - map.getHeightsArray()[col]) {
-                        tank.setParachute(tank.getParachute() - 1);
                     }
                 }
             }
@@ -309,20 +276,20 @@ public class processingTest extends PApplet {
     // tank get hit reduce life
     public boolean checkTankCollision(int col, int power) {
         int powerRange = 30;
-        if(currentTank.isCanon()){
+        if (currentTank.isCanon()) {
             powerRange = 60;
         }
         for (Tank tank : tanks) {
             // in the range of explosion
-            int dist = (int) abs(tank.getX()- col+tank.getY()-explosion.getY()) ;
+            int dist = (int) abs(tank.getX() - col + tank.getY() - explosion.getY());
 //            int dist = (int) dist(tank.getX(), tank.getY(), col, explosion.getY());
             if (dist <= powerRange && !explosion.isTankExplosion()) {
-                tank.reduceLife(powerRange-dist+10);
-                currentTank.gainScore(powerRange-dist+10, tank);
+                tank.reduceLife(powerRange - dist + 10);
+                currentTank.gainScore(powerRange - dist + 10, tank);
                 return true;
             }
-            if(!tank.isAlive()){
-                tankExplosion = new Explosion(tank.getX(), tank.getY(), 15,true);
+            if (!tank.isAlive()) {
+                tankExplosion = new Explosion(tank.getX(), tank.getY(), 15, true);
                 isTankExpFinished = false;
             }
         }

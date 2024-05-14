@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Position.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">tank-test Coverage Results</a> &gt; <a href="index.source.html" class="el_package">tt.map</a> &gt; <span class="el_source">Position.java</span></div><h1>Position.java</h1><pre class="source lang-java linenums">package tt.map;
+
+public class Position {
+    private char symbol;
+    private int x;
+    private int y;
+    private int angle;
+
+<span class="fc" id="L9">    public Position(int x, int y) {</span>
+<span class="fc" id="L10">        this.x = x;</span>
+<span class="fc" id="L11">        this.y = y;</span>
+<span class="fc" id="L12">    }</span>
+
+<span class="fc" id="L14">    public Position(int x,int y,char symbol){</span>
+<span class="fc" id="L15">        this.x  = x;</span>
+<span class="fc" id="L16">        this.y = y;</span>
+<span class="fc" id="L17">        this.symbol = symbol;</span>
+
+<span class="fc" id="L19">    }</span>
+
+    public int getX() {
+<span class="fc" id="L22">        return x;</span>
+    }
+
+    public int getY() {
+<span class="fc" id="L26">        return y;</span>
+    }
+
+    public void setX(int x) {
+<span class="fc" id="L30">        this.x = x;</span>
+<span class="fc" id="L31">    }</span>
+
+    public void setY(int y) {
+<span class="fc" id="L34">        this.y = y;</span>
+<span class="fc" id="L35">    }</span>
+
+    public String getSymbol() {
+<span class="fc" id="L38">        return String.valueOf(symbol);</span>
+    }
+
+    public void setSymbol(char symbol) {
+<span class="nc" id="L42">        this.symbol = symbol;</span>
+<span class="nc" id="L43">    }</span>
+
+    public int getAngle() {
+<span class="nc" id="L46">        return angle;</span>
+    }
+
+    public void setAngle(int angle) {
+<span class="fc" id="L50">        this.angle = angle;</span>
+<span class="fc" id="L51">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

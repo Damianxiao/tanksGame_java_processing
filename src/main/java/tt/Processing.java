@@ -189,26 +189,14 @@ public class Processing extends PApplet {
             currentTank = tanks.get(currentPlayerIndex);
             if (keyCode == LEFT && currentTank.getX() > 0 && currentTank.getFuel() > 0 && !currentTank.isShooted()) {
                 int diff = map.getHeightsArray()[currentTank.getX()] - map.getHeightsArray()[currentTank.getX() - 1];
-                if (diff <= 0) {
-                    currentTank.move(-1, diff);
-                    map.getPlayerPositions().get(currentPlayerIndex).setY(currentTank.getY());
-                    map.getPlayerPositions().get(currentPlayerIndex).setX(currentTank.getX());
-                } else if (diff > 0) {
-                    currentTank.move(-1, diff);
-                    map.getPlayerPositions().get(currentPlayerIndex).setY(currentTank.getY());
-                    map.getPlayerPositions().get(currentPlayerIndex).setX(currentTank.getX());
-                }
+                currentTank.move(-1, diff);
+                map.getPlayerPositions().get(currentPlayerIndex).setY(currentTank.getY());
+                map.getPlayerPositions().get(currentPlayerIndex).setX(currentTank.getX());
             } else if (keyCode == RIGHT && currentTank.getX() < 864 && currentTank.getFuel() > 0 && !currentTank.isShooted()) {
                 int diff = map.getHeightsArray()[currentTank.getX()] - map.getHeightsArray()[currentTank.getX() + 1];
-                if (diff <= 0) {
-                    currentTank.move(1, diff);
-                    map.getPlayerPositions().get(currentPlayerIndex).setY(currentTank.getY());
-                    map.getPlayerPositions().get(currentPlayerIndex).setX(currentTank.getX());
-                } else if (diff > 0) {
-                    currentTank.move(1, diff);
-                    map.getPlayerPositions().get(currentPlayerIndex).setY(currentTank.getY());
-                    map.getPlayerPositions().get(currentPlayerIndex).setX(currentTank.getX());
-                }
+                currentTank.move(1, diff);
+                map.getPlayerPositions().get(currentPlayerIndex).setY(currentTank.getY());
+                map.getPlayerPositions().get(currentPlayerIndex).setX(currentTank.getX());
             } else if (keyCode == UP && !currentTank.isShooted()) {
                 currentTank.rotateTower(3);
                 for (Position p : map.getPlayerPositions()) {

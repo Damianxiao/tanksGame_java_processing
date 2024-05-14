@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Bullet.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">tank-test Coverage Results</a> &gt; <a href="index.source.html" class="el_package">tt.player</a> &gt; <span class="el_source">Bullet.java</span></div><h1>Bullet.java</h1><pre class="source lang-java linenums">package tt.player;
+
+import tt.map.Map;
+import tt.map.Wind;
+
+import static java.lang.Math.cos;
+import static java.lang.Math.sin;
+import static processing.core.PApplet.map;
+import static processing.core.PApplet.radians;
+
+public class Bullet {
+    private char symbol;
+    private int x;
+    private int y;
+    private float vx;
+    private float vy;
+    private int angle;
+    private int power;
+<span class="fc" id="L19">    private final float gravity = 3.6f/60;</span>
+<span class="fc" id="L20">    private boolean active = true;</span>
+<span class="fc" id="L21">    private boolean isExploded = false;</span>
+<span class="fc" id="L22">    private boolean ex = false;</span>
+
+<span class="fc" id="L24">    public Bullet(char symbol, int x, int y, int  angle) {</span>
+<span class="fc" id="L25">        this.symbol = symbol;</span>
+<span class="fc" id="L26">        this.x = x;</span>
+<span class="fc" id="L27">        this.y = y;</span>
+<span class="fc" id="L28">        this.angle = angle;</span>
+<span class="fc" id="L29">        this.power = 50;</span>
+<span class="fc" id="L30">        this.active = true;</span>
+<span class="fc" id="L31">        this.isExploded = false;</span>
+<span class="fc" id="L32">    }</span>
+
+
+<span class="fc" id="L35">    public Bullet(char symbol, int x, int y, int  angle, int power) {</span>
+<span class="fc" id="L36">        this.symbol = symbol;</span>
+<span class="fc" id="L37">        this.x = x;</span>
+<span class="fc" id="L38">        this.y = y;</span>
+<span class="fc" id="L39">        this.angle = angle;</span>
+<span class="fc" id="L40">        this.power = power;</span>
+<span class="fc" id="L41">        float initialVelocity = map(power, 0, 100, 1, 9);</span>
+<span class="fc" id="L42">        this.vx = (float) (initialVelocity * cos(radians(angle)));</span>
+<span class="fc" id="L43">        this.vy = -(float) (initialVelocity * sin(radians(angle)));</span>
+<span class="fc" id="L44">        this.active = true;</span>
+<span class="fc" id="L45">        this.isExploded = false;</span>
+<span class="fc" id="L46">    }</span>
+
+<span class="fc" id="L48">    public Bullet(char symbol, int x, int y, int  angle, int power,boolean ex) {</span>
+<span class="fc" id="L49">        this.symbol = symbol;</span>
+<span class="fc" id="L50">        this.x = x;</span>
+<span class="fc" id="L51">        this.y = y;</span>
+<span class="fc" id="L52">        this.angle = angle;</span>
+<span class="fc" id="L53">        this.power = power;</span>
+<span class="fc" id="L54">        float initialVelocity = map(power, 0, 100, 1, 9);</span>
+<span class="fc" id="L55">        this.vx = (float) (initialVelocity * cos(radians(angle)));</span>
+<span class="fc" id="L56">        this.vy = -(float) (initialVelocity * sin(radians(angle)));</span>
+<span class="fc" id="L57">        this.active = true;</span>
+<span class="fc" id="L58">        this.isExploded = false;</span>
+<span class="fc" id="L59">        this.ex = ex;</span>
+<span class="fc" id="L60">    }</span>
+
+
+    // angle convert
+    public static int angleConvert(int angle) {
+<span class="fc bfc" id="L65" title="All 2 branches covered.">        if(angle&gt;=90){</span>
+<span class="fc" id="L66">            return  270-angle;</span>
+        }
+        else {
+<span class="fc" id="L69">            return angle;</span>
+        }
+    }
+
+    // update bullet
+    public void update(Wind wind) {
+        // wind affect the bullet x
+<span class="fc" id="L76">        float windAcceleration = (wind.getStrength() * 0.03f/60);</span>
+<span class="fc bfc" id="L77" title="All 2 branches covered.">        if(active){</span>
+<span class="fc" id="L78">            vy += gravity;</span>
+<span class="fc" id="L79">            vx += windAcceleration;</span>
+<span class="fc" id="L80">            x += vx;</span>
+<span class="fc" id="L81">            y += vy;</span>
+        }
+<span class="fc" id="L83">    }</span>
+
+    // check if bullet is exploded
+    public boolean isExploded(Map map) {
+<span class="fc" id="L87">        int x = (int) this.x;</span>
+<span class="fc" id="L88">        int y = (int) this.y;</span>
+<span class="fc" id="L89">        int row = (int) this.y/32;</span>
+
+<span class="pc bpc" id="L91" title="2 of 8 branches missed.">        if (x &gt;= 0 &amp;&amp; x &lt; map.getHeightsArray().length &amp;&amp; row &gt;= 0 &amp;&amp; row &lt; map.getTerrain()[0].length) {</span>
+<span class="fc" id="L92">            int terrainHeight = map.getHeightsArray()[x];</span>
+<span class="fc bfc" id="L93" title="All 2 branches covered.">            if (y &gt;= 640-terrainHeight) {</span>
+<span class="fc" id="L94">                return true;</span>
+            }
+        }
+<span class="fc" id="L97">        return false;</span>
+    }
+
+    public char getSymbol() {
+<span class="fc" id="L101">        return symbol;</span>
+    }
+
+
+    public int getX() {
+<span class="fc" id="L106">        return x;</span>
+    }
+
+    public void setX(int x) {
+<span class="fc" id="L110">        this.x = x;</span>
+<span class="fc" id="L111">    }</span>
+
+    public int getY() {
+<span class="fc" id="L114">        return y;</span>
+    }
+
+    public void setY(int y) {
+<span class="fc" id="L118">        this.y = y;</span>
+<span class="fc" id="L119">    }</span>
+
+    public double getAngle() {
+<span class="fc" id="L122">        return angle;</span>
+    }
+
+    public boolean isOutOfMap() {
+<span class="fc bfc" id="L126" title="All 8 branches covered.">        return x &lt; 0 || x &gt; 950 || y &lt; 0 || y &gt; 750;</span>
+//        return x &lt; -100 || x &gt; 1000 || y &lt; -100 || y &gt; 800;
+    }
+
+    public int getPower() {
+<span class="fc" id="L131">        return power;</span>
+    }
+
+    public boolean isActive() {
+<span class="nc" id="L135">        return active;</span>
+    }
+
+    public void setActive(boolean active) {
+<span class="fc" id="L139">        this.active = active;</span>
+<span class="fc" id="L140">    }</span>
+
+
+    public boolean isEx() {
+<span class="fc" id="L144">        return ex;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

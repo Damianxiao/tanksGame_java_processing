@@ -21,6 +21,7 @@ import java.util.List;
 import static javafx.scene.paint.Color.color;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static tt.player.Bullet.angleConvert;
 
 public class test extends PApplet {
     private static Map map;
@@ -127,14 +128,19 @@ public class test extends PApplet {
     public void testCheckTankCollision() {
         Explosion explosion = new Explosion(100, 100, 50);
         app.explosion = explosion;
-        Tank tank = new Tank('F', 100, 100, 100, true, 0, 50, 250);
+        Tank tank = new Tank('F', 100, 100, 40, true, 0, 50, 250);
         Tank tankG = new Tank('G', 11, 111, 100, true, 0, 50, 250);
         app.tanks.add(tank);
         app.tanks.add(tankG);
 
         assertFalse(app.checkTankCollision(400, 30)); // tankG out of range
-        assertTrue(app.checkTankCollision(100, 30)); // tankF within explosive range
-        assertEquals(60, tank.getLife()); // Check tankB life reduction take 40 damage from explosion
+        assertTrue(app.checkTankCollision(100, 30)); // tank within explosive range
+        assertEquals(0, tank.getLife()); // Check tankB life reduction take 40 damage from explosion
+        // explosion cause tankG dead trigger tankExplosion
+        assertEquals(0, tank.getLife());
+        assertTrue(!tank.isAlive());
+        assertTrue(app.tankExplosion == null);
+        assertTrue(app.isTankExpFinished);
     }
 
     @Test
@@ -198,73 +204,161 @@ public class test extends PApplet {
         }
     }
 
-
     @Test
-    public void testTankMove() throws AWTException {
+    public void testTankMove() {
         // tank move
         app.currentPlayerIndex = 0;
         int diff = 0;
         app.tanks.get(app.currentPlayerIndex).setX(400);
         Tank tank = app.tanks.get(app.currentPlayerIndex);
         // Test right move
+        delay(20);
         testTankMovement(tank,KeyEvent.VK_RIGHT, tank.getX() + 1, "Tank should move right by one unit.");
         // Test left move
+        delay(20);
         testTankMovement(tank,KeyEvent.VK_LEFT, tank.getX() - 1, "Tank should move left by one unit.");
         // if fuel <=0  cant move
         tank.setX(0);
         tank.setFuel(0);
+        delay(20);
         testTankMovement(tank,KeyEvent.VK_RIGHT, tank.getX(), "Tank should not move right when fuel is 0.");
+        delay(20);
         testTankMovement(tank,KeyEvent.VK_LEFT, tank.getX(), "Tank should not move left when fuel is 0.");
         // if isShooted cant move
         tank.setShooted(true);
+        delay(20);
         testTankMovement(tank,KeyEvent.VK_RIGHT, tank.getX(), "Tank should not move right when isShooted.");
+        delay(20);
         testTankMovement(tank,KeyEvent.VK_LEFT, tank.getX(), "Tank should not move LEFT when isShooted.");
 
+        app.tanks.get(app.currentPlayerIndex).setX(0);
+        // Test border when tank x <= 0
+        delay(20);
+        testTankMovement(tank,KeyEvent.VK_LEFT, 0, "Tank can't left move when x=0.");
+
+        app.tanks.get(app.currentPlayerIndex).setX(864);
+        // Test border when tank x >= 864
+        delay(20);
+        testTankMovement(tank,KeyEvent.VK_RIGHT, 864, "Tank can't right move when x=864.");
+
+        // when isShooted cant move
+        tank.setShooted(true);
+        delay(20);
+        testTankMovement(tank,KeyEvent.VK_RIGHT, tank.getX(), "Tank should not move right when isShooted.");
+        delay(20);
+        testTankMovement(tank,KeyEvent.VK_LEFT, tank.getX(), "Tank should not move LEFT when isShooted.");
+
+    }
+
+    @Test
+    public void testTankMoveWhenHill(){
+        Tank tank = app.currentTank;
         // if right is downhill y should decrease
         tank.setX(20);
         tank.setFuel(100);
-        diff = map.getHeightsArray()[tank.getX()] - map.getHeightsArray()[tank.getX() + 1];
-        testTankMovementHill(tank,KeyEvent.VK_RIGHT, tank.getX()+1,tank.getY()+diff, "Tank should not move right when right is downhill.");
+        int diff = map.getHeightsArray()[tank.getX()] - map.getHeightsArray()[tank.getX() + 1];
+        delay(20);
+        testTankMovementHill(tank,KeyEvent.VK_RIGHT, tank.getX()+1,tank.getY()+diff, "Tank Y should  move down right when right is downhill.");
         //if left is downhill y should decrease
         tank.setFuel(100);
         diff = map.getHeightsArray()[tank.getX()] - map.getHeightsArray()[tank.getX() - 1];
-        testTankMovementHill(tank,KeyEvent.VK_LEFT, tank.getX()-1,tank.getY()+diff, "Tank should not move left when right is downhill.");
+        delay(20);
+        testTankMovementHill(tank,KeyEvent.VK_LEFT, tank.getX()-1,tank.getY()+diff, "Tank Y should  move down  when left is downhill.");
         // if right is uphill y should increase
         tank.setX(800);
         tank.setFuel(100);
         diff = map.getHeightsArray()[tank.getX()] - map.getHeightsArray()[tank.getX() + 1];
-        testTankMovementHill(tank,KeyEvent.VK_RIGHT, tank.getX()+1,tank.getY()+diff, "Tank should not move right when right is uphill.");
+        delay(20);
+        testTankMovementHill(tank,KeyEvent.VK_RIGHT, tank.getX()+1,tank.getY()+diff, "Tank Y should  move up when right is uphill.");
         //if left is uphill y should increase
         tank.setX(100);
         tank.setFuel(100);
         diff = map.getHeightsArray()[tank.getX()] - map.getHeightsArray()[tank.getX() - 1];
-        testTankMovementHill(tank,KeyEvent.VK_LEFT, tank.getX()-1,tank.getY()+diff, "Tank should not move left when right is uphill.");
-
-
-
-        app.tanks.get(app.currentPlayerIndex).setX(0);
-        // Test border when tank x = 0
-        testTankMovement(tank,KeyEvent.VK_LEFT, 0, "Tank can't left move when x=0.");
-
-        app.tanks.get(app.currentPlayerIndex).setX(864);
-        // Test border when tank x = 864
-        testTankMovement(tank,KeyEvent.VK_RIGHT, 864, "Tank can't right move when x=864.");
+        delay(20);
+        testTankMovementHill(tank,KeyEvent.VK_LEFT, tank.getX()-1,tank.getY()+diff, "Tank should not move up when left is uphill.");
     }
 
     @Test
     public void testTankTowerRotate(){
+        Tank tank =app.currentTank;
+        //rotate tower
+        tank.setAngle(90);
+        tank.rotateTower(10);
+        assertTrue(tank.getAngle() == 100);
+
+        tank.setAngle(270);
+        tank.rotateTower(10);
+        assertTrue(tank.getAngle() == 270);
+
+        tank.setAngle(90);
+        tank.rotateTower(-10);
+        assertTrue(tank.getAngle() == 90);
+
+        delay(100);
         // Test tower rotate up
         testTankTowerRotate(90, 3, KeyEvent.VK_UP, "Tower should rotate up by 3 degree.");
 
         // Test tower rotate down
+        delay(100);
         testTankTowerRotate(180, -3, KeyEvent.VK_DOWN, "Tower should rotate down by 3 degree.");
 
         // Test tower can't rotate less than 90 degree
+        delay(100);
         testTankTowerRotate(90, 0, KeyEvent.VK_DOWN, "Tower can't rotate less than 90 degree.");
 
         // Test tower can't rotate more than 270 degree
+        delay(100);
         testTankTowerRotate(270, 0, KeyEvent.VK_UP, "Tower can't rotate more than 270 degree.");
+
+        //when isShooted cant rotate
+        tank.setShooted(true);
+        delay(100);
+        testTankTowerRotate(90, 0, KeyEvent.VK_UP, "Tower should not rotate when isShooted.");
+        delay(100);
+        testTankTowerRotate(90, 0, KeyEvent.VK_DOWN, "Tower should not rotate when isShooted.");
+
     }
+
+    // powerChange test
+    @Test
+    public void testChangePower(){
+        delay(200);
+        Tank tank =app.currentTank;
+        int power = tank.getPower();
+        app.key = 'w';
+        app.keyPressed();
+        // increase power
+        assertEquals(power+1, tank.getPower());
+
+        // if isShooted cant change power
+        tank.setShooted(true);
+        delay(200);
+        app.key = 'w';
+        app.keyPressed();
+        assertEquals(power+1, tank.getPower());
+        // if power = 100 cant increase
+        tank.setShooted(false);
+        tank.setPower(100);
+        delay(200);
+        app.key = 'w';
+        app.keyPressed();
+        assertEquals(100, tank.getPower());
+        // if power = 1 cant decrease
+        tank.setPower(1);
+        delay(200);
+        app.key = 's';
+        app.keyPressed();
+        assertEquals(1, tank.getPower());
+        // if isShooted cant change power
+        tank.setShooted(true);
+        delay(200);
+        app.key = 's';
+        app.keyPressed();
+        assertEquals(1, tank.getPower());
+
+    }
+
+
 
     // gain score
     @Test
@@ -498,6 +592,287 @@ public class test extends PApplet {
     }
 
 
+    @Test
+    public void testRepairTank() {
+        // use repair tool
+        Tank tank = app.currentTank;
+        tank.setScore(50);
+        tank.setLife(50);
+        app.key = 't';
+        app.keyPressed();
+        app.keyPressed();
+        app.keyReleased();
+        assertTrue(tank.getLife() == 70);
+        // isShooted cant repair
+        tank.setShooted(true);
+        app.key = 't';
+        app.keyPressed();
+        app.keyPressed();
+        app.keyReleased();
+        assertTrue(tank.getLife() == 70);
+
+    }
+
+    @Test
+    public void testIncreaseFuelTank() {
+        // use fuel tool
+        Tank tank = app.currentTank;
+        tank.setScore(50);
+        tank.setFuel(50);
+        app.key = 'f';
+        app.keyPressed();
+        app.keyPressed();
+        app.keyReleased();
+        assertTrue(tank.getFuel() == 250);
+        // isShooted
+        tank.setShooted(true);
+        app.key = 'f';
+        app.keyPressed();
+        app.keyPressed();
+        app.keyReleased();
+        assertTrue(tank.getFuel() == 250);
+
+    }
+
+    @Test
+    public void testUseParachuteTool(){
+        // use parachute tool
+        Tank tank = app.currentTank;
+        tank.setScore(50);
+        tank.setParachute(0);
+        app.key = 'p';
+        app.keyPressed();
+        app.keyPressed();
+        app.keyReleased();
+        assertTrue(tank.getParachute() == 1);
+        // isShooted cant use parachute
+        tank.setShooted(true);
+        app.key = 'p';
+        app.keyPressed();
+        app.keyPressed();
+        app.keyReleased();
+        assertTrue(tank.getParachute() == 1);
+
+    }
+
+    @Test
+    public void testIncreasePowerTank() {
+        // use power tool
+        Tank tank = app.currentTank;
+        tank.getToolBag()[3] = 0;
+        tank.setScore(50);
+        tank.setPower(50);
+        app.key = 'x';
+        app.keyPressed();
+        app.keyPressed();
+        app.keyReleased();
+        assertTrue(tank.isCanon());
+        // isShooted cant use power
+        tank.setShooted(true);
+        app.key = 'x';
+        app.keyPressed();
+        app.keyPressed();
+        app.keyReleased();
+        assertTrue(tank.isCanon());
+
+    }
+
+
+    @Test
+    public void testRestartGame(){
+        app.gameEnd = true;
+        app.gameRestarted = false;
+        app.key = 'r';
+        app.keyPressed();
+        app.keyReleased();
+        assertFalse(app.gameRestarted);
+    }
+
+
+    @Test
+    public void testGameEndandGameRestartIsTrue(){
+        // gameend is false and game restarted is true
+        app.gameEnd = false;
+        app.gameRestarted = true;
+        app.key = 'r';
+        app.keyPressed();
+        app.keyReleased();
+        assertFalse(app.gameRestarted);
+    }
+
+    @Test
+    public void testGameEndandAllIsFalse(){
+        // gameend is false and game restarted is false
+        app.gameEnd = false;
+        app.gameRestarted = false;
+        app.key = 'r';
+        app.keyPressed();
+        app.keyReleased();
+        assertFalse(app.gameRestarted);
+    }
+
+    @Test
+    public void testRestartGameWhenGameEndIsTrueAndGameRestartedIsFalse() {
+        // gameend is true and game restarted is false
+        app.gameEnd = true;
+        app.gameRestarted = false;
+
+        app.restartGame();
+
+        assertFalse(app.gameEnd);
+
+        assertFalse(app.gameRestarted);
+
+        assertEquals(-1, app.selectedLevel);
+
+        assertTrue(app.tanks.isEmpty());
+
+        assertEquals(0, app.currentPlayerIndex);
+    }
+
+
+    @Test
+    public void testRestartGameWhenGameEndIsFalseAndGameRestartedIsTrue() {
+        //gameend is false and game restarted is true
+        app.gameEnd = false;
+        app.gameRestarted = true;
+        app.restartGame();
+        assertEquals(-1, app.selectedLevel);
+        assertTrue(app.tanks.isEmpty());
+        assertEquals(0, app.currentPlayerIndex);
+    }
+
+    @Test
+    public void testRestartGameWhenGameEndIsFalseAndGameRestartedIsFalse() {
+        // gameend is false and game restarted is false
+        app.gameEnd = false;
+        app.gameRestarted = false;
+        app.restartGame();
+        assertFalse(app.gameEnd);
+        assertFalse(app.gameRestarted);
+        assertEquals(-1, app.selectedLevel);
+        assertTrue(app.tanks.isEmpty());
+        assertEquals(0, app.currentPlayerIndex);
+    }
+
+
+    @Test
+    public void testShootWhenCanonTrue() {
+        // when bullet is ex bullet
+        Tank tank = app.currentTank;
+        tank.setCanon(true);
+        app.shoot();
+
+        assertEquals(1, app.projectiles.size());
+        Bullet bullet = app.projectiles.get(0);
+        assertEquals(tank.getSymbol(), bullet.getSymbol());
+        assertEquals(tank.getX(), bullet.getX());
+        assertEquals(tank.getY(), bullet.getY());
+        assertEquals(angleConvert(tank.getAngle()), bullet.getAngle());
+        assertEquals(50, bullet.getPower());
+    }
+
+    @Test
+    public void testShootWhenCanonFalse() {
+        // when bullet is normal bullet
+        Tank tank = app.currentTank;
+        tank.setCanon(false);
+        app.shoot();
+
+        assertEquals(1, app.projectiles.size());
+        Bullet bullet = app.projectiles.get(0);
+        assertEquals(tank.getSymbol(), bullet.getSymbol());
+        assertEquals(tank.getX(), bullet.getX());
+        assertEquals(tank.getY(), bullet.getY());
+        assertEquals(angleConvert(tank.getAngle()), bullet.getAngle());
+        assertEquals(50, bullet.getPower());
+    }
+
+    @Test
+    public void testTurnSwitchWhenCurrentTankIsAlive() {
+        app.tanks.clear();
+        // turnSwitch test
+        Tank tank = new Tank('A', 0, 0, 100, true, 0, 50, 250);
+        Tank tank1 = new Tank('B', 0, 0, 100, true, 0, 50, 250);
+
+        tank.setAlive(true);
+        tank1.setAlive(false);
+
+        app.currentPlayerIndex = 0;
+        app.tanks.add(tank);
+        app.tanks.add(tank1);
+        app.currentTank = tank;
+
+        app.turnSwitch();
+        // current tank is tank becasue tank1 is dead
+        assertEquals(0, app.currentPlayerIndex);
+        assertEquals(app.currentTank.getSymbol(),tank.getSymbol());
+        assertTrue(app.lastSwitchTime > 0);
+    }
+
+    @Test
+    public void testTurnSwitchWhenCurrentTankIsAllAlive() {
+        app.tanks.clear();
+        // turnSwitch test
+        Tank tank = new Tank('A', 0, 0, 100, true, 0, 50, 250);
+        Tank tank1 = new Tank('B', 0, 0, 100, true, 0, 50, 250);
+        app.tanks.add(tank);
+        app.tanks.add(tank1);
+        app.currentPlayerIndex = 0;
+
+        app.currentTank = tank;
+        app.turnSwitch();
+        assertEquals(1, app.currentPlayerIndex);
+        assertEquals(app.currentTank.getSymbol(),tank1.getSymbol());
+        assertTrue(app.lastSwitchTime > 0);
+    }
+
+
+    @Test
+    public void testTurnSwitchWhenNextTankIsDead() {
+        // turnSwitch test
+        app.tanks.clear();
+
+        Tank tank1 = new Tank('A', 0, 0, 100, false, 0, 50, 250);
+        Tank tank2 = new Tank('B', 0, 0, 100, true, 0, 50, 250);
+        Tank tank3 = new Tank('C', 0, 0, 100, false, 0, 50, 250);
+
+        app.currentPlayerIndex = 0;
+        app.tanks.add(tank1);
+        app.tanks.add(tank2);
+        app.tanks.add(tank3);
+        app.currentTank = tank1;
+
+        app.turnSwitch();
+
+        assertEquals(1, app.currentPlayerIndex);
+        assertEquals(tank2, app.currentTank);
+    }
+
+    @Test
+    void testRestartGameWhenGameEndAndNotRestarted() {
+        app.gameEnd = true;
+        app.gameRestarted = false;
+        app.restartGame();
+        assertFalse(app.gameRestarted);
+    }
+
+    @Test
+    void testRestartGameWhenGameEndAndRestarted() {
+        app.gameEnd = true;
+        app.gameRestarted = true;
+        app.restartGame();
+        assertFalse(app.gameRestarted);
+    }
+
+    @Test
+    void testRestartGameWhenNotGameEnd() {
+        app.gameEnd = false;
+        app.gameRestarted = false;
+        app.restartGame();
+        assertFalse(app.gameRestarted);
+    }
+
 
 
     /* *
@@ -572,6 +947,68 @@ public class test extends PApplet {
 
     /* *
      * @Description
+     * Parachute  test
+    */
+    @Test
+    public void testDeployParachuteWhenTankIsNotAlive() {
+        // already dead tank can't deploy parachute
+        Tank tank = new Tank('A', 0, 0, 0, false, 0, 0, 0);
+        app.deployParachute(tank, 0);
+        assertNull(app.tankExplosion);
+        assertTrue(app.isTankExpFinished);
+    }
+
+    @Test
+    public void testDeployParachuteWhenTankHasNoParachuteAndBelowThreshold() {
+        // Tank has no parachute and is below threshold
+        Tank tank = new Tank('A', 0, 0, 100, true, 0, 0, 0);
+        tank.setParachute(0);
+        tank.setY(0);
+        app.deployParachute(tank, 300);
+        // no parachute will move 5 pixel by one frame
+        assertEquals(5, tank.getY());
+        assertEquals(95, tank.getLife());
+    }
+
+    @Test
+    void testDeployParachuteWhenTankHasNoParachuteAndAboveThreshold() {
+        // no parachute and above threshold will no trigger the parachute
+        Tank tank = new Tank('A', 0, 0, 100, true, 0, 0, 0);
+        tank.setParachute(0);
+        tank.setY(640);
+        app.deployParachute(tank, 0);
+        assertEquals(640, tank.getY());
+        assertEquals(100, tank.getLife());
+    }
+
+    @Test
+    void testDeployParachuteWhenTankHasParachuteAndAboveThreshold() {
+        // parachute and above threshold will no trigger the parachute
+        Tank tank = new Tank('A', 0, 0, 100, true, 1, 0, 0);
+        tank.setParachute(3);
+        tank.setY(640);
+        app.deployParachute(tank, 0);
+        assertEquals(640, tank.getY());
+        assertEquals(100, tank.getLife());
+        assertEquals(3, tank.getParachute());
+    }
+
+    @Test
+    void testCheckTankCollisionWithTankExplosion() {
+        // check tank collision with tank explosion
+        Tank destroyedTank = new Tank('B', 10, 10, 100, false, 0, 0, 0);
+        app.explosion = new Explosion(5, 5, 0, true);
+        assertFalse(app.checkTankCollision(5, 30));
+        assertEquals(100, destroyedTank.getLife());
+    }
+
+
+
+
+
+
+    /* *
+     * @Description
      * Bullet test
     */
 
@@ -588,6 +1025,15 @@ public class test extends PApplet {
         // bullet start location should be tank position
         assertEquals(tank.getX(), app.projectiles.get(0).getX(), "Bullet x should be same as tank x.");
         assertEquals(tank.getY(), app.projectiles.get(0).getY(), "Bullet y should be same as tank y.");
+
+        // when isShooted cant shoot
+        app.key = ' ';
+        app.keyPressed();
+        app.keyReleased();
+        app.delay(200);
+        assertTrue(tank.isShooted(), "Tank should not shoot the bullet.");
+        assertEquals(1, app.projectiles.size(), "There should be one bullet.");
+
     }
 
     @Test
@@ -695,8 +1141,8 @@ public class test extends PApplet {
     @Test
     public void testAngleConvert() {
         // angle convert
-        assertTrue(Bullet.angleConvert(45) == 45);
-        assertTrue(Bullet.angleConvert(100) == 170);
+        assertTrue(angleConvert(45) == 45);
+        assertTrue(angleConvert(100) == 170);
     }
 
     /* *
@@ -766,6 +1212,7 @@ public class test extends PApplet {
 
 
 
+
     @Test
     public void testSmoothData() {
         // smooth the data
@@ -780,27 +1227,6 @@ public class test extends PApplet {
         int[] interpolatedArray = map.interpolateArray(originalArray, 10);
         assertEquals(interpolatedArray.length, 10);
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Map.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">tank-test Coverage Results</a> &gt; <a href="index.source.html" class="el_package">tt.map</a> &gt; <span class="el_source">Map.java</span></div><h1>Map.java</h1><pre class="source lang-java linenums">package tt.map;
+
+import processing.data.JSONObject;
+import tt.player.Tank;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static java.lang.Math.*;
+import static processing.core.PApplet.dist;
+
+public class Map {
+    private List&lt;List&lt;Character&gt;&gt; grid;
+    private int[][] terrain;
+    private ArrayList&lt;Position&gt; playerPositions;
+    private ArrayList&lt;Position&gt; treePositions;
+    private int[] heightsArray;
+    private String backgroundFileName;
+    private JSONObject playerNames;
+    private int terrainColor;
+    private String treeFileName;
+    private ArrayList&lt;Tank&gt; tanks;
+    private String parachuteFileName;
+    private Wind wind;
+    private String windFileName;
+    private String fuelFileName;
+    private String gasFileName;
+    private String repairFileName;
+    private String exFileName;
+    private String parachuteKitFileName;
+    private String levelName;
+
+
+    public Map(List&lt;List&lt;Character&gt;&gt; grid, int[][] terrain, ArrayList&lt;Position&gt; playerPositions,
+<span class="fc" id="L35">               ArrayList&lt;Position&gt; treePositions) {</span>
+<span class="fc" id="L36">        this.grid = grid;</span>
+<span class="fc" id="L37">        this.terrain = terrain;</span>
+<span class="fc" id="L38">        this.playerPositions = playerPositions;</span>
+<span class="fc" id="L39">        this.treePositions = treePositions;</span>
+<span class="fc" id="L40">    }</span>
+
+    public void updateTerrain(int col, int power) {
+<span class="pc bpc" id="L43" title="1 of 4 branches missed.">        if(col &lt; 0 || col &gt;= heightsArray.length){</span>
+<span class="fc" id="L44">            return;</span>
+        }else{
+<span class="fc" id="L46">            int height = heightsArray[col];</span>
+<span class="fc" id="L47">            int powerRange = power / 2;</span>
+<span class="fc bfc" id="L48" title="All 2 branches covered.">            for (int i = col - powerRange; i &lt;= col + powerRange; i++) {</span>
+<span class="pc bpc" id="L49" title="1 of 4 branches missed.">                if (i &gt;= 0 &amp;&amp; i &lt; heightsArray.length) {</span>
+                    // calculate new height
+<span class="fc" id="L51">                    int newHeight = max(0, height - (power - abs(col - i)));</span>
+<span class="fc" id="L52">                    heightsArray[i] = newHeight;</span>
+                }
+            }
+            // smooth the terrain
+<span class="fc" id="L56">            setHeightsArray(smoothData(getHeightsArray(), 5));</span>
+        }
+<span class="fc" id="L58">    }</span>
+
+
+    public int[] smoothData(int[] data, int windowSize) {
+<span class="fc" id="L62">        int[] smoothedData = new int[data.length];</span>
+<span class="fc bfc" id="L63" title="All 2 branches covered.">        for (int i = 0; i &lt; data.length; i++) {</span>
+<span class="fc" id="L64">            int sum = 0;</span>
+<span class="fc" id="L65">            int count = 0;</span>
+<span class="fc bfc" id="L66" title="All 2 branches covered.">            for (int j = max(0, i - windowSize / 2); j &lt;= min(data.length - 1, i + windowSize / 2); j++) {</span>
+<span class="fc" id="L67">                sum += data[j];</span>
+<span class="fc" id="L68">                count++;</span>
+            }
+<span class="fc" id="L70">            smoothedData[i] = sum / count;</span>
+        }
+
+<span class="fc" id="L73">        return smoothedData;</span>
+    }
+
+    // interpolate array
+    public int[] interpolateArray(int[] originalArray, int targetLength) {
+<span class="fc" id="L78">        float interpolationFactor = (float) originalArray.length / targetLength;</span>
+<span class="fc" id="L79">        int[] interpolatedArray = new int[targetLength];</span>
+<span class="fc bfc" id="L80" title="All 2 branches covered.">        for (int i = 0; i &lt; targetLength; i++) {</span>
+<span class="fc" id="L81">            float originalIndex = i * interpolationFactor;</span>
+<span class="fc" id="L82">            int lowerIndex = (int) Math.floor(originalIndex);</span>
+<span class="fc" id="L83">            int upperIndex = min((int) Math.ceil(originalIndex), originalArray.length - 1);</span>
+<span class="fc" id="L84">            float fraction = originalIndex - lowerIndex;</span>
+<span class="fc" id="L85">            interpolatedArray[i] = (int) (originalArray[lowerIndex] * (1 - fraction)</span>
+                    + originalArray[upperIndex] * fraction);
+        }
+<span class="fc" id="L88">        return interpolatedArray;</span>
+    }
+
+    // get heightsArray
+    public int[] heightsArray(int[][] terrain) {
+<span class="fc" id="L93">        int[] maxValues = new int[28];</span>
+<span class="fc" id="L94">        int rows = terrain.length;</span>
+<span class="fc" id="L95">        int cols = terrain[0].length;</span>
+
+<span class="fc bfc" id="L97" title="All 2 branches covered.">        for (int col = 0; col &lt; cols; col++) {</span>
+<span class="fc" id="L98">            int max = terrain[0][col];</span>
+<span class="fc bfc" id="L99" title="All 2 branches covered.">            for (int row = 1; row &lt; rows; row++) {</span>
+<span class="fc bfc" id="L100" title="All 2 branches covered.">                if (terrain[row][col] &gt; max) {</span>
+<span class="fc" id="L101">                    max = terrain[row][col];</span>
+                }
+            }
+<span class="fc" id="L104">            maxValues[col] = max * 32;</span>
+        }
+<span class="fc" id="L106">        return maxValues;</span>
+    }
+
+    public List&lt;List&lt;Character&gt;&gt; getGrid() {
+<span class="fc" id="L110">        return grid;</span>
+    }
+
+    public int[][] getTerrain() {
+<span class="fc" id="L114">        return terrain;</span>
+    }
+
+    public ArrayList&lt;Position&gt; getPlayerPositions() {
+<span class="fc" id="L118">        return playerPositions;</span>
+    }
+
+    public ArrayList&lt;Position&gt; getTreePositions() {
+<span class="fc" id="L122">        return treePositions;</span>
+    }
+
+    public int[] getHeightsArray() {
+<span class="fc" id="L126">        return heightsArray;</span>
+    }
+
+    public void setHeightsArray(int[] heightsArray) {
+<span class="fc" id="L130">        this.heightsArray = heightsArray;</span>
+<span class="fc" id="L131">    }</span>
+
+    public void setGrid(List&lt;List&lt;Character&gt;&gt; grid) {
+<span class="nc" id="L134">        this.grid = grid;</span>
+<span class="nc" id="L135">    }</span>
+
+    public void setTerrain(int[][] terrain) {
+<span class="nc" id="L138">        this.terrain = terrain;</span>
+<span class="nc" id="L139">    }</span>
+
+    public void setPlayerPositions(ArrayList&lt;Position&gt; playerPositions) {
+<span class="nc" id="L142">        this.playerPositions = playerPositions;</span>
+<span class="nc" id="L143">    }</span>
+
+    public void setTreePositions(ArrayList&lt;Position&gt; treePositions) {
+<span class="nc" id="L146">        this.treePositions = treePositions;</span>
+<span class="nc" id="L147">    }</span>
+
+    public String getBackgroundFileName() {
+<span class="nc" id="L150">        return backgroundFileName;</span>
+    }
+
+    public void setBackgroundFileName(String backgroundFileName) {
+<span class="fc" id="L154">        this.backgroundFileName = backgroundFileName;</span>
+<span class="fc" id="L155">    }</span>
+
+    public JSONObject getPlayerNames() {
+<span class="nc" id="L158">        return playerNames;</span>
+    }
+
+    public void setPlayerNames(JSONObject playerNames) {
+<span class="fc" id="L162">        this.playerNames = playerNames;</span>
+<span class="fc" id="L163">    }</span>
+
+    public int getTerrainColor() {
+<span class="nc" id="L166">        return terrainColor;</span>
+    }
+
+    public void setTerrainColor(int terrainColor) {
+<span class="fc" id="L170">        this.terrainColor = terrainColor;</span>
+<span class="fc" id="L171">    }</span>
+
+    public String getTreeFileName() {
+<span class="nc" id="L174">        return treeFileName;</span>
+    }
+
+    public void setTreeFileName(String treeFileName) {
+<span class="fc" id="L178">        this.treeFileName = treeFileName;</span>
+<span class="fc" id="L179">    }</span>
+
+    public ArrayList&lt;Tank&gt; getTanks() {
+<span class="nc" id="L182">        return tanks;</span>
+    }
+
+    public void setTanks(ArrayList&lt;Tank&gt; tanks) {
+<span class="nc" id="L186">        this.tanks = tanks;</span>
+<span class="nc" id="L187">    }</span>
+
+    public String getParachuteFileName() {
+<span class="fc" id="L190">        return parachuteFileName;</span>
+    }
+
+    public void setParachuteFileName(String parachuteFileName) {
+<span class="fc" id="L194">        this.parachuteFileName = parachuteFileName;</span>
+<span class="fc" id="L195">    }</span>
+
+    public Wind getWind() {
+<span class="nc" id="L198">        return wind;</span>
+    }
+
+    public void setWind(Wind wind) {
+<span class="fc" id="L202">        this.wind = wind;</span>
+<span class="fc" id="L203">    }</span>
+
+    public String getWindFileName() {
+<span class="fc" id="L206">        return windFileName;</span>
+    }
+
+    public void setWindFileName(String windFileName) {
+<span class="fc" id="L210">        this.windFileName = windFileName;</span>
+<span class="fc" id="L211">    }</span>
+
+    public String getFuelFileName() {
+<span class="fc" id="L214">        return fuelFileName;</span>
+    }
+
+    public void setFuelFileName(String fuelFileName) {
+<span class="fc" id="L218">        this.fuelFileName = fuelFileName;</span>
+<span class="fc" id="L219">    }</span>
+
+    public String getGasFileName() {
+<span class="fc" id="L222">        return gasFileName;</span>
+    }
+
+    public void setGasFileName(String gasFileName) {
+<span class="fc" id="L226">        this.gasFileName = gasFileName;</span>
+<span class="fc" id="L227">    }</span>
+
+    public String getRepairFileName() {
+<span class="fc" id="L230">        return repairFileName;</span>
+    }
+
+    public void setRepairFileName(String repairFileName) {
+<span class="fc" id="L234">        this.repairFileName = repairFileName;</span>
+<span class="fc" id="L235">    }</span>
+
+    public String getExFileName() {
+<span class="fc" id="L238">        return exFileName;</span>
+    }
+
+    public void setExFileName(String exFileName) {
+<span class="fc" id="L242">        this.exFileName = exFileName;</span>
+<span class="fc" id="L243">    }</span>
+
+    public String getParachuteKitFileName() {
+<span class="fc" id="L246">        return parachuteKitFileName;</span>
+    }
+
+    public void setParachuteKitFileName(String parachuteKitFileName) {
+<span class="fc" id="L250">        this.parachuteKitFileName = parachuteKitFileName;</span>
+<span class="fc" id="L251">    }</span>
+
+    public String getLevelName() {
+<span class="nc" id="L254">        return levelName;</span>
+    }
+
+    public void setLevelName(String levelName) {
+<span class="fc" id="L258">        this.levelName = levelName;</span>
+<span class="fc" id="L259">    }</span>
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>processingTest.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">tank-test Coverage Results</a> &gt; <a href="index.source.html" class="el_package">tt</a> &gt; <span class="el_source">processingTest.java</span></div><h1>processingTest.java</h1><pre class="source lang-java linenums">package tt;
+
+import processing.core.PApplet;
+import processing.core.PImage;
+import processing.data.JSONObject;
+import tt.map.Map;
+import tt.map.MapLoader;
+import tt.map.Position;
+import tt.map.Wind;
+import tt.player.Bullet;
+import tt.player.Explosion;
+import tt.player.Tank;
+
+import java.util.ArrayList;
+
+import static tt.player.Bullet.angleConvert;
+
+<span class="fc" id="L18">public class processingTest extends PApplet {</span>
+    public Map map;
+<span class="fc" id="L20">    public ArrayList&lt;Tank&gt; tanks = new ArrayList&lt;&gt;();</span>
+    Tank currentTank;
+<span class="fc" id="L22">    public int currentPlayerIndex = 0;</span>
+<span class="fc" id="L23">    int lastSwitchTime = 0;</span>
+<span class="fc" id="L24">    private boolean showArrow = true;</span>
+<span class="fc" id="L25">    int selectedLevel = -1;</span>
+    private JSONObject config;
+<span class="fc" id="L27">    private final String levelPath = &quot;src/main/resources/level/&quot;;</span>
+<span class="fc" id="L28">    private final String picPath = &quot;src/main/resources/pic/&quot;;</span>
+<span class="fc" id="L29">    ArrayList&lt;Bullet&gt; projectiles = new ArrayList&lt;&gt;();</span>
+    Explosion explosion;
+    Explosion tankExplosion;
+<span class="fc" id="L32">    private boolean isExpFinished = true;</span>
+<span class="fc" id="L33">    boolean isTankExpFinished = true;</span>
+<span class="fc" id="L34">    private MapLoader mapLoader = new MapLoader();</span>
+<span class="fc" id="L35">    public PImage background = null;</span>
+<span class="fc" id="L36">    public PImage tree = null;</span>
+<span class="fc" id="L37">    public PImage fuel = null;</span>
+<span class="fc" id="L38">    public PImage wind = null;</span>
+<span class="fc" id="L39">    public PImage gas = null;</span>
+<span class="fc" id="L40">    public PImage repair = null;</span>
+<span class="fc" id="L41">    public PImage ex = null;</span>
+<span class="fc" id="L42">    PImage parachuteKit = null;</span>
+<span class="fc" id="L43">    boolean gameEnd = false;</span>
+<span class="fc" id="L44">    boolean gameRestarted = false;</span>
+
+
+    public void setup() {
+<span class="fc" id="L48">        smooth();</span>
+<span class="fc" id="L49">        noStroke();</span>
+<span class="fc" id="L50">        frameRate(60);</span>
+<span class="fc" id="L51">    }</span>
+
+    @Override
+    public void settings() {
+<span class="fc" id="L55">        size(864, 640);</span>
+<span class="fc" id="L56">        config = loadJSONObject(levelPath + &quot;config.json&quot;);</span>
+<span class="fc" id="L57">    }</span>
+
+    // draw map
+    public void draw() {
+<span class="fc" id="L61">    }</span>
+
+    // check if only one tank is alive
+    public int suriveTanks() {
+<span class="fc" id="L65">        int count = 0;</span>
+<span class="fc bfc" id="L66" title="All 2 branches covered.">        for (Tank tank : tanks) {</span>
+<span class="fc bfc" id="L67" title="All 2 branches covered.">            if (tank.isAlive()) {</span>
+<span class="fc" id="L68">                count++;</span>
+            }
+<span class="fc" id="L70">        }</span>
+<span class="fc" id="L71">        return count;</span>
+    }
+
+    public Tank getHighestScoringPlayer() {
+<span class="fc" id="L75">        Tank highestScorer = tanks.get(0);</span>
+<span class="fc bfc" id="L76" title="All 2 branches covered.">        for (Tank player : tanks) {</span>
+<span class="fc bfc" id="L77" title="All 2 branches covered.">            if (player.getScore() &gt; highestScorer.getScore()) {</span>
+<span class="fc" id="L78">                highestScorer = player;</span>
+            }
+<span class="fc" id="L80">        }</span>
+<span class="fc" id="L81">        return highestScorer;</span>
+    }
+
+    public void keyPressed() {
+<span class="fc" id="L85">        currentTank = tanks.get(currentPlayerIndex);</span>
+<span class="pc bpc" id="L86" title="1 of 8 branches missed.">        if (keyCode == LEFT &amp;&amp; currentTank.getX() &gt; 0 &amp;&amp; currentTank.getFuel() &gt; 0 &amp;&amp; !currentTank.isShooted()) {</span>
+<span class="fc" id="L87">            int diff = map.getHeightsArray()[currentTank.getX()] - map.getHeightsArray()[currentTank.getX() - 1];</span>
+<span class="fc" id="L88">            currentTank.move(-1, diff);</span>
+<span class="fc" id="L89">            map.getPlayerPositions().get(currentPlayerIndex).setY(currentTank.getY());</span>
+<span class="fc" id="L90">            map.getPlayerPositions().get(currentPlayerIndex).setX(currentTank.getX());</span>
+<span class="pc bpc" id="L91" title="1 of 8 branches missed.">        } else if (keyCode == RIGHT &amp;&amp; currentTank.getX() &lt; 864 &amp;&amp; currentTank.getFuel() &gt; 0 &amp;&amp; !currentTank.isShooted()) {</span>
+<span class="fc" id="L92">            int diff = map.getHeightsArray()[currentTank.getX()] - map.getHeightsArray()[currentTank.getX() + 1];</span>
+<span class="fc" id="L93">            currentTank.move(1, diff);</span>
+<span class="fc" id="L94">            map.getPlayerPositions().get(currentPlayerIndex).setY(currentTank.getY());</span>
+<span class="fc" id="L95">            map.getPlayerPositions().get(currentPlayerIndex).setX(currentTank.getX());</span>
+<span class="fc bfc" id="L96" title="All 4 branches covered.">        } else if (keyCode == UP &amp;&amp; !currentTank.isShooted()) {</span>
+<span class="fc" id="L97">            currentTank.rotateTower(3);</span>
+<span class="fc bfc" id="L98" title="All 2 branches covered.">            for (Position p : map.getPlayerPositions()) {</span>
+<span class="fc bfc" id="L99" title="All 2 branches covered.">                if (p.getSymbol().charAt(0) == currentTank.getSymbol()) {</span>
+<span class="fc" id="L100">                    p.setAngle(currentTank.getAngle());</span>
+                }
+<span class="fc" id="L102">            }</span>
+<span class="fc bfc" id="L103" title="All 4 branches covered.">        } else if (keyCode == DOWN &amp;&amp; !currentTank.isShooted()) {</span>
+<span class="fc" id="L104">            currentTank.rotateTower(-3);</span>
+<span class="fc bfc" id="L105" title="All 2 branches covered.">            for (Position p : map.getPlayerPositions()) {</span>
+<span class="fc bfc" id="L106" title="All 2 branches covered.">                if (p.getSymbol().charAt(0) == currentTank.getSymbol()) {</span>
+<span class="fc" id="L107">                    p.setAngle(currentTank.getAngle());</span>
+                }
+<span class="fc" id="L109">            }</span>
+<span class="fc bfc" id="L110" title="All 4 branches covered.">        } else if (key == 'w' &amp;&amp; !currentTank.isShooted()) {</span>
+<span class="fc" id="L111">            currentTank.gainPower(1);</span>
+<span class="fc bfc" id="L112" title="All 4 branches covered.">        } else if (key == 's' &amp;&amp; !currentTank.isShooted()) {</span>
+<span class="fc" id="L113">            currentTank.gainPower(-1);</span>
+<span class="fc bfc" id="L114" title="All 2 branches covered.">        } else if (key == ' ') {</span>
+<span class="fc bfc" id="L115" title="All 2 branches covered.">            if (!currentTank.isShooted()) {</span>
+<span class="fc" id="L116">                shoot();</span>
+<span class="fc" id="L117">                currentTank.setShooted(true);</span>
+            }
+<span class="fc bfc" id="L119" title="All 4 branches covered.">        } else if (key == 't' &amp;&amp; !currentTank.isShooted()) {</span>
+<span class="fc" id="L120">            currentTank.repair();</span>
+<span class="fc bfc" id="L121" title="All 4 branches covered.">        } else if (key == 'f' &amp;&amp; !currentTank.isShooted()) {</span>
+<span class="fc" id="L122">            currentTank.increaseFuel();</span>
+<span class="fc bfc" id="L123" title="All 4 branches covered.">        } else if (key == 'p' &amp;&amp; !currentTank.isShooted()) {</span>
+<span class="fc" id="L124">            currentTank.increaseParachute();</span>
+<span class="fc bfc" id="L125" title="All 4 branches covered.">        } else if (key == 'x' &amp;&amp; !currentTank.isShooted()) {</span>
+<span class="fc" id="L126">            currentTank.increasePower();</span>
+<span class="pc bpc" id="L127" title="1 of 4 branches missed.">        } else if (key == 'r' || gameRestarted) {</span>
+<span class="fc" id="L128">            restartGame();</span>
+        }
+<span class="fc" id="L130">    }</span>
+
+    void restartGame() {
+<span class="fc" id="L133">        gameEnd = false;</span>
+<span class="fc" id="L134">        gameRestarted = false;</span>
+<span class="fc" id="L135">        selectedLevel = -1;</span>
+<span class="fc" id="L136">        tanks.clear();</span>
+<span class="fc" id="L137">        currentPlayerIndex = 0;</span>
+<span class="fc" id="L138">    }</span>
+
+    public void shoot() {
+<span class="fc bfc" id="L141" title="All 2 branches covered.">        if (currentTank.isCanon()) {</span>
+<span class="fc" id="L142">            Bullet bullet = new Bullet(currentTank.getSymbol(), currentTank.getX(), currentTank.getY(), angleConvert(currentTank.getAngle()), currentTank.getPower(), true);</span>
+<span class="fc" id="L143">            projectiles.add(bullet);</span>
+<span class="fc" id="L144">        } else {</span>
+<span class="fc" id="L145">            Bullet bullet = new Bullet(currentTank.getSymbol(), currentTank.getX(), currentTank.getY(), angleConvert(currentTank.getAngle()), currentTank.getPower());</span>
+<span class="fc" id="L146">            projectiles.add(bullet);</span>
+        }
+<span class="fc" id="L148">    }</span>
+
+
+    public void startGame() {
+        // get config for selected level
+<span class="fc" id="L153">        JSONObject level = config.getJSONArray(&quot;levels&quot;).getJSONObject(0);</span>
+<span class="fc" id="L154">        String levelName = level.getString(&quot;name&quot;);</span>
+<span class="fc" id="L155">        String levelFileName = level.getString(&quot;layout&quot;);</span>
+<span class="fc" id="L156">        String backgroundFileName = level.getString(&quot;background&quot;);</span>
+<span class="fc" id="L157">        String terrianColorStr = level.getString(&quot;foreground-color&quot;);</span>
+<span class="fc" id="L158">        String[] terrainColorArr = terrianColorStr.split(&quot;,&quot;);</span>
+<span class="fc" id="L159">        JSONObject playerNames = config.getJSONObject(&quot;player_color&quot;);</span>
+<span class="fc" id="L160">        int terrainColor = color(Integer.parseInt(terrainColorArr[0]), Integer.parseInt(terrainColorArr[1]),</span>
+<span class="fc" id="L161">                Integer.parseInt(terrainColorArr[2]));</span>
+<span class="fc" id="L162">        String treeFileName = level.getString(&quot;trees&quot;);</span>
+<span class="fc" id="L163">        String parachuteFileName = level.getString(&quot;parachute&quot;);</span>
+<span class="fc" id="L164">        String windFileName = level.getString(&quot;wind&quot;);</span>
+<span class="fc" id="L165">        String fuelFileName = level.getString(&quot;fuel&quot;);</span>
+<span class="fc" id="L166">        String gasFileName = level.getString(&quot;gas-station&quot;);</span>
+<span class="fc" id="L167">        String repairFileName = level.getString(&quot;repair&quot;);</span>
+<span class="fc" id="L168">        String exFileName = level.getString(&quot;ex&quot;);</span>
+<span class="fc" id="L169">        String parachuteKitFileName = level.getString(&quot;parachute-kit&quot;);</span>
+        // load map
+<span class="fc" id="L171">        map = MapLoader.loadMap(levelPath + levelFileName);</span>
+<span class="fc" id="L172">        map.setLevelName(levelName);</span>
+<span class="fc" id="L173">        map.setBackgroundFileName(backgroundFileName);</span>
+<span class="fc" id="L174">        map.setTerrainColor(terrainColor);</span>
+<span class="fc" id="L175">        map.setPlayerNames(playerNames);</span>
+<span class="fc" id="L176">        map.setTreeFileName(treeFileName);</span>
+<span class="fc" id="L177">        map.setParachuteFileName(parachuteFileName);</span>
+<span class="fc" id="L178">        map.setWindFileName(windFileName);</span>
+<span class="fc" id="L179">        map.setFuelFileName(fuelFileName);</span>
+<span class="fc" id="L180">        map.setGasFileName(gasFileName);</span>
+<span class="fc" id="L181">        map.setRepairFileName(repairFileName);</span>
+<span class="fc" id="L182">        map.setExFileName(exFileName);</span>
+<span class="fc" id="L183">        map.setParachuteKitFileName(parachuteKitFileName);</span>
+<span class="fc" id="L184">        fuel = loadImage(picPath + map.getFuelFileName());</span>
+<span class="fc" id="L185">        fuel.resize(32, 32);</span>
+<span class="fc" id="L186">        wind = loadImage(picPath + map.getWindFileName());</span>
+<span class="fc" id="L187">        wind.resize(32, 32);</span>
+<span class="fc" id="L188">        gas = loadImage(picPath + map.getGasFileName());</span>
+<span class="fc" id="L189">        gas.resize(20, 20);</span>
+<span class="fc" id="L190">        repair = loadImage(picPath + map.getRepairFileName());</span>
+<span class="fc" id="L191">        repair.resize(20, 20);</span>
+<span class="fc" id="L192">        ex = loadImage(picPath + map.getExFileName());</span>
+<span class="fc" id="L193">        ex.resize(20, 20);</span>
+<span class="fc" id="L194">        parachuteKit = loadImage(picPath + map.getParachuteKitFileName());</span>
+<span class="fc" id="L195">        parachuteKit.resize(20, 20);</span>
+<span class="fc" id="L196">        int heights[] = map.heightsArray(map.getTerrain());</span>
+        // extend heights array
+<span class="fc" id="L198">        int extendedHeights[] = map.interpolateArray(heights, 28 * 32);</span>
+        // smooth heights
+<span class="fc" id="L200">        int smoothHeights[] = map.smoothData(extendedHeights, 32);</span>
+<span class="fc" id="L201">        smoothHeights = map.smoothData(smoothHeights, 32);</span>
+<span class="fc" id="L202">        smoothHeights = map.smoothData(smoothHeights, 32);</span>
+<span class="fc" id="L203">        map.setHeightsArray(smoothHeights);</span>
+        // set player y position
+<span class="fc bfc" id="L205" title="All 2 branches covered.">        for (Position p : map.getPlayerPositions()) {</span>
+<span class="fc" id="L206">            p.setY(640 - smoothHeights[p.getX()] - 16);</span>
+<span class="fc" id="L207">        }</span>
+        // set the tree position
+<span class="fc bfc" id="L209" title="All 2 branches covered.">        for (Position p : map.getTreePositions()) {</span>
+<span class="fc" id="L210">            p.setY(640 - smoothHeights[p.getX()]);</span>
+<span class="fc" id="L211">        }</span>
+
+        // init tank
+<span class="fc bfc" id="L214" title="All 2 branches covered.">        for (Position p : map.getPlayerPositions()) {</span>
+<span class="fc" id="L215">            Tank tank = new Tank(p.getSymbol().charAt(0), p.getX(), p.getY(), 100, true, 0, 50, 250);</span>
+<span class="fc" id="L216">            tanks.add(tank);</span>
+<span class="fc" id="L217">            p.setAngle(tank.getAngle());</span>
+<span class="fc" id="L218">        }</span>
+        // init wind
+<span class="fc" id="L220">        map.setWind(new Wind());</span>
+
+<span class="fc" id="L222">    }</span>
+
+
+    //  switch player turn
+    public void turnSwitch() {
+<span class="fc" id="L227">        currentTank.setShooted(false);</span>
+<span class="fc" id="L228">        lastSwitchTime = millis();</span>
+<span class="fc" id="L229">        currentPlayerIndex = (currentPlayerIndex + 1) % tanks.size();</span>
+<span class="fc" id="L230">        currentTank = tanks.get(currentPlayerIndex);</span>
+<span class="fc bfc" id="L231" title="All 2 branches covered.">        if (!currentTank.isAlive()) {</span>
+<span class="fc" id="L232">            int nextTankIndex = (currentPlayerIndex + 1) % tanks.size();</span>
+<span class="pc bpc" id="L233" title="1 of 2 branches missed.">            while (!tanks.get(nextTankIndex).isAlive()) {</span>
+<span class="nc" id="L234">                nextTankIndex = (nextTankIndex + 1) % tanks.size();</span>
+            }
+<span class="fc" id="L236">            currentPlayerIndex = nextTankIndex;</span>
+<span class="fc" id="L237">            currentTank = tanks.get(currentPlayerIndex);</span>
+<span class="fc" id="L238">            lastSwitchTime = millis();</span>
+        }
+<span class="fc" id="L240">    }</span>
+
+    public void deployParachute(Tank tank, int col) {
+<span class="fc bfc" id="L243" title="All 2 branches covered.">        if (!tank.isAlive()) return;</span>
+<span class="fc" id="L244">        PImage parachuteImage = loadImage(picPath + map.getParachuteFileName());</span>
+<span class="fc" id="L245">        parachuteImage.resize(32, 32);</span>
+<span class="fc bfc" id="L246" title="All 2 branches covered.">        if (!tank.hasParachute()) {</span>
+<span class="fc bfc" id="L247" title="All 2 branches covered.">            if (tank.getY() &lt; 640 - map.getHeightsArray()[col] + 16) {</span>
+<span class="fc" id="L248">                tank.move(0, 5);</span>
+<span class="fc" id="L249">                tank.reduceLife(5);</span>
+<span class="pc bpc" id="L250" title="1 of 2 branches missed.">                if (!tank.isAlive()) {</span>
+<span class="nc" id="L251">                    tankExplosion = new Explosion(tank.getX(), tank.getY(), 15, true);</span>
+<span class="nc" id="L252">                    isTankExpFinished = false;</span>
+                }
+<span class="fc bfc" id="L254" title="All 2 branches covered.">                for (Position p : map.getPlayerPositions()) {</span>
+<span class="fc bfc" id="L255" title="All 2 branches covered.">                    if (p.getSymbol().charAt(0) == tank.getSymbol()) {</span>
+<span class="fc" id="L256">                        p.setY(tank.getY());</span>
+                    }
+<span class="fc" id="L258">                }</span>
+            }
+<span class="pc bpc" id="L260" title="1 of 4 branches missed.">        } else if (tank.hasParachute() &amp;&amp; 640 - map.getHeightsArray()[col] - tank.getY() &gt; 32) {</span>
+            // tip to remind parachute
+<span class="fc" id="L262">            image(parachuteImage, tank.getX() - parachuteImage.width / 2 + 12, tank.getY() - parachuteImage.height / 2 - 20);</span>
+<span class="pc bpc" id="L263" title="1 of 2 branches missed.">            if (tank.getY() &lt; 640 - map.getHeightsArray()[col] - 32) {</span>
+<span class="fc" id="L264">                tank.move(0, 1);</span>
+<span class="fc" id="L265">                tank.setParachute(tank.getParachute() - 1);</span>
+<span class="fc bfc" id="L266" title="All 2 branches covered.">                for (Position p : map.getPlayerPositions()) {</span>
+<span class="fc bfc" id="L267" title="All 2 branches covered.">                    if (p.getSymbol().charAt(0) == tank.getSymbol()) {</span>
+<span class="fc" id="L268">                        p.setY(tank.getY());</span>
+                    }
+<span class="fc" id="L270">                }</span>
+            }
+
+        }
+<span class="fc" id="L274">    }</span>
+
+    // tank get hit reduce life
+    public boolean checkTankCollision(int col, int power) {
+<span class="fc" id="L278">        int powerRange = 30;</span>
+<span class="pc bpc" id="L279" title="1 of 2 branches missed.">        if (currentTank.isCanon()) {</span>
+<span class="nc" id="L280">            powerRange = 60;</span>
+        }
+<span class="fc bfc" id="L282" title="All 2 branches covered.">        for (Tank tank : tanks) {</span>
+            // in the range of explosion
+<span class="fc" id="L284">            int dist = (int) abs(tank.getX() - col + tank.getY() - explosion.getY());</span>
+//            int dist = (int) dist(tank.getX(), tank.getY(), col, explosion.getY());
+<span class="pc bpc" id="L286" title="1 of 4 branches missed.">            if (dist &lt;= powerRange &amp;&amp; !explosion.isTankExplosion()) {</span>
+<span class="fc" id="L287">                tank.reduceLife(powerRange - dist + 10);</span>
+<span class="fc" id="L288">                currentTank.gainScore(powerRange - dist + 10, tank);</span>
+<span class="fc" id="L289">                return true;</span>
+            }
+<span class="pc bpc" id="L291" title="1 of 2 branches missed.">            if (!tank.isAlive()) {</span>
+<span class="nc" id="L292">                tankExplosion = new Explosion(tank.getX(), tank.getY(), 15, true);</span>
+<span class="nc" id="L293">                isTankExpFinished = false;</span>
+            }
+<span class="fc" id="L295">        }</span>
+<span class="fc" id="L296">        return false;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
